@@ -48,3 +48,26 @@ twoFactorEnabled: boolean;
 requiresConfirmation: boolean;
 };
 }
+declare namespace App.Features.UserManagement.Data {
+export type UserFormPageData = {
+user: App.Features.UserManagement.Data.UserManagementData | null;
+roles: Array<any>;
+};
+export type UserManagementData = {
+id: number;
+name: string;
+email: string;
+email_verified_at: string | null;
+created_at: string;
+role: string;
+};
+export type UsersPageData = {
+users: any;
+canCreate: boolean;
+canImpersonate: boolean;
+};
+}
+declare namespace App.Features.UserManagement.Enums {
+export type Permission = 'view users' | 'create users' | 'update users' | 'delete users' | 'impersonate users';
+export type Role = 'user' | 'super-admin';
+}
