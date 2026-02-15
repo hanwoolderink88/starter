@@ -1,0 +1,22 @@
+{
+    "agents": [
+        "opencode"
+    ],
+    "guidelines": true,
+    "herd_mcp": false,
+    "mcp": true,
+    "packages": [
+        "laravel/fortify",
+        "spatie/laravel-permission"
+    ],
+    "sail": true,
+    "skills": [
+        "wayfinder-development",
+        "mcp-development",
+        "pest-testing",
+        "inertia-react-development",
+        "tailwindcss-development",
+        "developing-with-fortify",
+        "laravel-permission-development"
+    ]
+}
