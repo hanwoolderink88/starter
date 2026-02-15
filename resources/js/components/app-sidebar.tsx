@@ -1,5 +1,6 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-react';
+import { useMemo } from 'react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,16 +14,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as usersIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
 
 const footerNavItems: NavItem[] = [
     {
@@ -38,6 +32,28 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { permissions } = usePage().props;
+
+    const mainNavItems = useMemo<NavItem[]>(() => {
+        const items: NavItem[] = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+        ];
+
+        if (permissions.viewUsers) {
+            items.push({
+                title: 'Users',
+                href: usersIndex(),
+                icon: Users,
+            });
+        }
+
+        return items;
+    }, [permissions.viewUsers]);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

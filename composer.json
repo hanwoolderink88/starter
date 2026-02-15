@@ -88,13 +88,12 @@
         "rector:dry-run": "vendor/bin/rector process --dry-run",
         "pint": "@php vendor/bin/pint",
         "lint": "find -L ./app ./bootstrap ./config ./database ./routes ./tests -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l",
-        "test": "@php vendor/bin/pest --parallel --processes=10",
+        "test": "@php vendor/bin/pest  --parallel --processes=10",
         "test:coverage": "@php vendor/bin/pest --parallel --processes=10 --coverage-html ./tests/coverage",
         "cleanup": [
-            "rector",
-            "pint",
-            "analyse",
-            "test"
+            "composer rector",
+            "composer pint",
+            "composer analyse"
         ]
     },
     "extra": {
