@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -66,7 +67,7 @@ class UserFactory extends Factory
     public function invited(): static
     {
         return $this->afterCreating(function (User $user) {
-            \Illuminate\Support\Facades\DB::table('users')
+            DB::table('users')
                 ->where('id', $user->id)
                 ->update([
                     'password' => null,

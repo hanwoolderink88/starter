@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Loader2, Mail, Pencil, UserCheck } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
