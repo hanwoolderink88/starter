@@ -10,6 +10,8 @@ use App\Features\UserManagement\Controllers\EditUserController;
 use App\Features\UserManagement\Controllers\ImpersonateController;
 use App\Features\UserManagement\Controllers\IndexUsersController;
 use App\Features\UserManagement\Controllers\ResendInvitationController;
+use App\Features\UserManagement\Controllers\ShowAcceptInvitationController;
+use App\Features\UserManagement\Controllers\StoreAcceptInvitationController;
 use App\Features\UserManagement\Controllers\StoreUserController;
 use App\Features\UserManagement\Controllers\UpdateUserController;
 use Illuminate\Support\Facades\Route;
@@ -20,9 +22,13 @@ Route::get('/', fn () => Inertia::render('welcome', new WelcomePageData(
     canRegister: Features::enabled(Features::registration()),
 )))->name('home');
 
-Route::get('invitation/{user}', fn () => response('Invitation acceptance - to be implemented'))
-    ->middleware('signed')
-    ->name('invitation.accept');
+Route::get('/invitation/accept/{user}', ShowAcceptInvitationController::class)
+    ->name('invitation.accept')
+    ->middleware(['signed', 'guest']);
+
+Route::post('/invitation/accept/{user}', StoreAcceptInvitationController::class)
+    ->name('invitation.store')
+    ->middleware('guest');
 
 Route::get('dashboard', fn () => Inertia::render('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
 

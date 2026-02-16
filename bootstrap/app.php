@@ -23,5 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (InvalidSignatureException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('invitation/*')) {
+                return Inertia::render('auth/invitation-expired')->toResponse($request)->setStatusCode(403);
+            }
+
+            return response('Link expired or invalid', 403);
+        });
     })->create();
