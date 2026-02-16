@@ -18,10 +18,10 @@ class StoreAcceptInvitationController extends Controller
             return redirect(route('login'))->with('info', 'Invitation already accepted.');
         }
 
-        $user->update([
+        $user->forceFill([
             'password' => $request->validated('password'),
             'email_verified_at' => now(),
-        ]);
+        ])->save();
 
         Auth::login($user);
 
