@@ -20,8 +20,6 @@ export default function CreateUserForm({
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
-        password: '',
-        password_confirmation: '',
         role: '',
     });
 
@@ -59,39 +57,6 @@ export default function CreateUserForm({
                             placeholder="Email address"
                         />
                         <InputError message={errors.email} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                            required
-                            autoComplete="new-password"
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">
-                            Confirm Password
-                        </Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            value={data.password_confirmation}
-                            onChange={(e) =>
-                                setData('password_confirmation', e.target.value)
-                            }
-                            required
-                            autoComplete="new-password"
-                            placeholder="Confirm password"
-                        />
                     </div>
 
                     <div className="grid gap-2">
