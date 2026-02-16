@@ -29,8 +29,7 @@ class StoreUserController extends Controller
             Role::from($request->validated('role')),
         );
 
-        // TODO: Uncomment when Task 4 creates invitation.accept route
-        // $user->notify(new InvitationNotification($user));
+        $user->notify(new InvitationNotification($user));
 
         return redirect()->route('users.index');
     }

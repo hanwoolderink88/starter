@@ -19,6 +19,10 @@ Route::get('/', fn () => Inertia::render('welcome', new WelcomePageData(
     canRegister: Features::enabled(Features::registration()),
 )))->name('home');
 
+Route::get('invitation/{user}', fn () => response('Invitation acceptance - to be implemented'))
+    ->middleware('signed')
+    ->name('invitation.accept');
+
 Route::get('dashboard', fn () => Inertia::render('dashboard'))->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {

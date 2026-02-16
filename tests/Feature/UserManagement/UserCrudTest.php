@@ -70,22 +70,25 @@ test('admins can create a user', function () {
     ]);
 });
 
-// TODO: Uncomment when Task 4 creates invitation.accept route
-// test('invitation notification is sent when creating a user', function () {
-//     Notification::fake();
-//
-//     $this->actingAs(createAdmin());
-//
-//     $this->post(route('users.store'), [
-//         'name' => 'New User',
-//         'email' => 'newuser@example.com',
-//         'role' => Role::User->value,
-//     ])->assertRedirect(route('users.index'));
-//
-//     $user = User::where('email', 'newuser@example.com')->first();
-//
-//     Notification::assertSentTo($user, InvitationNotification::class);
-// });
+test('invitation notification is sent when creating a user', function () {
+    Notification::fake();
+
+    $this->actingAs(createAdmin());
+
+    $response = $this->post(route('users.store'), [
+        'name' => 'New User',
+        'email' => 'newuser@example.com',
+        'role' => Role::User->value,
+    ]);
+
+    $response->assertRedirect(route('users.index'));
+
+    $user = User::where('email', 'newuser@example.com')->first();
+
+    expect($user)->not->toBeNull();
+
+    Notification::assertSentTo($user, InvitationNotification::class);
+});
 
 test('store validates required fields', function () {
     $this->actingAs(createAdmin());
