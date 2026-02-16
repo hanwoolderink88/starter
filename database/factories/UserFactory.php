@@ -59,4 +59,19 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => now(),
         ]);
     }
+
+    /**
+     * Indicate that the model is invited (no password, unverified email).
+     */
+    public function invited(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            \Illuminate\Support\Facades\DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'password' => null,
+                    'email_verified_at' => null,
+                ]);
+        });
+    }
 }
