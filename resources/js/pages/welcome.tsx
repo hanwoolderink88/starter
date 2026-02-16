@@ -1,12 +1,13 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import HeroSection from '@/components/welcome/hero-section';
 import Navigation from '@/components/welcome/navigation';
+import type { PageProps } from '@/types';
+import type { WelcomePageData } from '@/types/generated';
 
 export default function Welcome({
+    auth,
     canRegister,
-}: App.Features.Auth.Data.WelcomePageData) {
-    const { auth } = usePage().props;
-
+}: PageProps<WelcomePageData>) {
     return (
         <>
             <Head title="Welcome">

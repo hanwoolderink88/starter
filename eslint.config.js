@@ -79,7 +79,7 @@ export default [
             'bootstrap/ssr',
             'tailwind.config.js',
             'vite.config.ts',
-            'resources/js/types/generated.d.ts',
+            'resources/js/types/generated.ts',
             'resources/js/actions',
             'resources/js/routes',
         ],

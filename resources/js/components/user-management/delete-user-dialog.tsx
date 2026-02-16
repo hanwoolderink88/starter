@@ -9,8 +9,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { destroy } from '@/routes/users';
-
-type UserManagementData = App.Features.UserManagement.Data.UserManagementData;
+import type { UserManagementData } from '@/types/generated';
 
 export default function DeleteUserDialog({
     user,

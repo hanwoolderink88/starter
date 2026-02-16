@@ -12,10 +12,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { store } from '@/routes/users';
+import type { UserFormPageData } from '@/types/generated';
 
 export default function CreateUserForm({
     roles,
-}: Pick<App.Features.UserManagement.Data.UserFormPageData, 'roles'>) {
+}: Pick<UserFormPageData, 'roles'>) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',

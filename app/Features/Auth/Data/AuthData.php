@@ -10,5 +10,5 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class AuthData extends Data
 {
-    public function __construct(public UserData $user) {}
+    public function __construct(public ?UserData $user) {}
 }

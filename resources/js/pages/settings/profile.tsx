@@ -4,7 +4,8 @@ import UpdateProfileForm from '@/components/settings/update-profile-form';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PageProps } from '@/types';
+import type { ProfilePageData } from '@/types/generated';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Profile({
     mustVerifyEmail,
     status,
-}: App.Features.Settings.Data.ProfilePageData) {
+}: PageProps<ProfilePageData>) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />

@@ -10,9 +10,10 @@ import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { disable, enable, show } from '@/routes/two-factor';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PageProps } from '@/types';
+import type { TwoFactorPageData } from '@/types/generated';
 
-type Props = App.Features.Settings.Data.TwoFactorPageData;
+type Props = PageProps<TwoFactorPageData>;
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

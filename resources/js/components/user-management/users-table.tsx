@@ -12,8 +12,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { edit, impersonate } from '@/routes/users';
-
-type UserManagementData = App.Features.UserManagement.Data.UserManagementData;
+import type { UserManagementData } from '@/types/generated';
 
 export default function UsersTable({
     users,

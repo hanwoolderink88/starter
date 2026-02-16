@@ -12,15 +12,14 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { update } from '@/routes/users';
-
-type UserManagementData = App.Features.UserManagement.Data.UserManagementData;
+import type { UserFormPageData, UserManagementData } from '@/types/generated';
 
 export default function EditUserForm({
     user,
     roles,
 }: {
     user: UserManagementData;
-    roles: App.Features.UserManagement.Data.UserFormPageData['roles'];
+    roles: UserFormPageData['roles'];
 }) {
     const { data, setData, put, processing, errors } = useForm({
         name: user.name,
