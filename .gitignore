@@ -39,3 +39,5 @@ AGENTS.md
 /.continue
 /.aider*
 /.copilot
+/.sisyphus
+opencode.json
