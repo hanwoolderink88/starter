@@ -2,7 +2,9 @@
 
 use App\Features\UserManagement\Enums\Permission;
 use App\Features\UserManagement\Enums\Role;
+use App\Features\UserManagement\Notifications\InvitationNotification;
 use App\Models\User;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission as PermissionModel;
 use Spatie\Permission\Models\Role as RoleModel;
 
@@ -175,4 +177,37 @@ test('regular users cannot delete users', function () {
     $target = createRegularUser();
 
     $this->delete(route('users.destroy', $target))->assertForbidden();
+});
+
+test('admin can resend invitation to invited user', function () {
+    Notification::fake();
+    $admin = createAdmin();
+    $invitedUser = User::factory()->invited()->create();
+
+    $this->actingAs($admin)
+        ->post(route('users.resend-invitation', $invitedUser))
+        ->assertRedirect();
+
+    Notification::assertSentTo($invitedUser, InvitationNotification::class);
+});
+
+test('admin cannot resend invitation to user with password', function () {
+    Notification::fake();
+    $admin = createAdmin();
+    $acceptedUser = User::factory()->create();
+
+    $this->actingAs($admin)
+        ->post(route('users.resend-invitation', $acceptedUser))
+        ->assertSessionHas('error');
+
+    Notification::assertNothingSent();
+});
+
+test('regular user cannot resend invitation', function () {
+    $regularUser = createRegularUser();
+    $invitedUser = User::factory()->invited()->create();
+
+    $this->actingAs($regularUser)
+        ->post(route('users.resend-invitation', $invitedUser))
+        ->assertForbidden();
 });

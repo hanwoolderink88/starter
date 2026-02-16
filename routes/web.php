@@ -9,6 +9,7 @@ use App\Features\UserManagement\Controllers\DestroyUserController;
 use App\Features\UserManagement\Controllers\EditUserController;
 use App\Features\UserManagement\Controllers\ImpersonateController;
 use App\Features\UserManagement\Controllers\IndexUsersController;
+use App\Features\UserManagement\Controllers\ResendInvitationController;
 use App\Features\UserManagement\Controllers\StoreUserController;
 use App\Features\UserManagement\Controllers\UpdateUserController;
 use Illuminate\Support\Facades\Route;
@@ -45,4 +46,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('users/{user}', UpdateUserController::class)->name('users.update');
     Route::delete('users/{user}', DestroyUserController::class)->name('users.destroy');
     Route::post('users/{user}/impersonate', ImpersonateController::class)->name('users.impersonate');
+    Route::post('users/{user}/resend-invitation', ResendInvitationController::class)->name('users.resend-invitation');
 });
