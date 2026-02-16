@@ -25,6 +25,10 @@ export default function UsersTable({
 }) {
     const { auth } = usePage().props;
 
+    if (!auth.user) return null;
+
+    const currentUser = auth.user;
+
     function handleImpersonate(user: UserManagementData) {
         router.post(impersonate(user.id).url);
     }
@@ -80,7 +84,7 @@ export default function UsersTable({
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-1">
                                         {canImpersonate &&
-                                            user.id !== auth.user.id && (
+                                            user.id !== currentUser.id && (
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
@@ -101,7 +105,7 @@ export default function UsersTable({
                                                 <Pencil className="size-4" />
                                             </Link>
                                         </Button>
-                                        {user.id !== auth.user.id && (
+                                        {user.id !== currentUser.id && (
                                             <Button
                                                 variant="ghost"
                                                 size="sm"

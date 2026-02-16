@@ -69,6 +69,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+
+    if (!auth.user) return null;
+
     return (
         <>
             <div className="border-b border-sidebar-border/80">
@@ -223,7 +226,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 >
                                     <Avatar className="size-8 overflow-hidden rounded-full">
                                         <AvatarImage
-                                            src={auth.user.avatar}
+                                            src={auth.user.avatar ?? undefined}
                                             alt={auth.user.name}
                                         />
                                         <AvatarFallback className="rounded-lg bg-muted text-foreground">
