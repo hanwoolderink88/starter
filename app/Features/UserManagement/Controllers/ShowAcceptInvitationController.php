@@ -6,13 +6,14 @@ namespace App\Features\UserManagement\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ShowAcceptInvitationController extends Controller
 {
-    public function __invoke(Request $request, User $user): Response|\Illuminate\Http\RedirectResponse
+    public function __invoke(Request $request, User $user): Response|RedirectResponse
     {
         if ($user->password !== null) {
             return redirect(route('login'))->with('info', 'Invitation already accepted. Please log in.');

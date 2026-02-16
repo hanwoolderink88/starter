@@ -222,3 +222,38 @@ feat(users): add invitation notification with signed URL
 - Test added to verify notification sent
 - Code style compliant
 - Ready for Task 4 to implement acceptance flow
+
+---
+
+## Task 9: Comprehensive Invitation Flow Tests
+
+### Bugs Found and Fixed
+
+**Bug 1: `email_verified_at` not mass-assignable**
+
+`StoreAcceptInvitationController` used `$user->update()` with `email_verified_at`, but the User model's `$fillable` only includes `['name', 'email', 'password']`. The `update()` call silently ignored `email_verified_at`.
+
+Fix: Changed to `$user->forceFill([...])->save()` to bypass mass assignment protection.
+
+**Bug 2: Missing imports in `bootstrap/app.php`**
+
+The `InvalidSignatureException` handler referenced `InvalidSignatureException`, `Request`, and `Inertia` without importing them. PHP resolved these as global namespace classes that don't exist, so the handler never fired for expired/tampered signed URLs.
+
+Fix: Added `use Illuminate\Routing\Exceptions\InvalidSignatureException`, `use Illuminate\Http\Request`, `use Inertia\Inertia`.
+
+### Test File
+
+`tests/Feature/UserManagement/UserInvitationTest.php` — 12 tests, 58 assertions.
+
+Helper function collision with `UserCrudTest.php` resolved using `function_exists()` guards.
+
+### Verification
+
+- 73 tests pass (0 failures, 231 assertions)
+- Frontend builds successfully
+- Code style passes (`pint --dirty`)
+- Wayfinder routes regenerated
+
+### Status
+
+Task 9 Complete

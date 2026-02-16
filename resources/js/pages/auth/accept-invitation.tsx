@@ -1,11 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
-import AuthLayout from '@/layouts/auth-layout';
+import type { FormEventHandler } from 'react';
+import StoreAcceptInvitation from '@/actions/App/Features/UserManagement/Controllers/StoreAcceptInvitationController';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
-import StoreAcceptInvitation from '@/actions/App/Features/UserManagement/Controllers/StoreAcceptInvitationController';
+import AuthLayout from '@/layouts/auth-layout';
 
 interface Props {
     user: {
