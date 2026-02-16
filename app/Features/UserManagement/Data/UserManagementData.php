@@ -19,6 +19,7 @@ class UserManagementData extends Data
         public ?string $email_verified_at,
         public string $created_at,
         public string $role,
+        public bool $has_password,
     ) {}
 
     public static function fromUser(User $user): self
@@ -33,6 +34,7 @@ class UserManagementData extends Data
             email_verified_at: $user->email_verified_at?->toISOString(),
             created_at: $user->created_at?->toISOString() ?? '',
             role: $firstRole !== null ? $firstRole->name : Role::User->value,
+            has_password: $user->password !== null,
         );
     }
 }

@@ -66,6 +66,7 @@ export type UserManagementData = {
     email_verified_at: string | null;
     created_at: string;
     role: string;
+    has_password: boolean;
 };
 export type UsersPageData = {
     users: any;

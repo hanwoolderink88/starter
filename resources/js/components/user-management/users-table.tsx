@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
-import { Pencil, UserCheck } from 'lucide-react';
+import { Loader2, Mail, Pencil, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { edit, impersonate } from '@/routes/users';
+import { edit, impersonate, resendInvitation } from '@/routes/users';
 import type { UserManagementData } from '@/types/generated';
 
 export default function UsersTable({
@@ -24,6 +25,7 @@ export default function UsersTable({
     onDeleteRequest: (user: UserManagementData) => void;
 }) {
     const { auth } = usePage().props;
+    const [resendingId, setResendingId] = useState<number | null>(null);
 
     if (!auth.user) return null;
 
@@ -31,6 +33,19 @@ export default function UsersTable({
 
     function handleImpersonate(user: UserManagementData) {
         router.post(impersonate(user.id).url);
+    }
+
+    function handleResendInvitation(user: UserManagementData) {
+        router.post(
+            resendInvitation(user.id).url,
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => setResendingId(user.id),
+                onFinish: () => setResendingId(null),
+                onSuccess: () => {},
+            },
+        );
     }
 
     return (
@@ -42,6 +57,7 @@ export default function UsersTable({
                             <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Role</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead>Created</TableHead>
                             <TableHead className="text-right">
                                 Actions
@@ -52,7 +68,7 @@ export default function UsersTable({
                         {users.length === 0 && (
                             <TableRow>
                                 <TableCell
-                                    colSpan={5}
+                                    colSpan={6}
                                     className="py-8 text-center text-muted-foreground"
                                 >
                                     No users found.
@@ -77,12 +93,44 @@ export default function UsersTable({
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
+                                    <Badge
+                                        variant={
+                                            user.has_password
+                                                ? 'success'
+                                                : 'warning'
+                                        }
+                                    >
+                                        {user.has_password
+                                            ? 'Active'
+                                            : 'Invited'}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
                                     {new Date(
                                         user.created_at,
                                     ).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-1">
+                                        {!user.has_password && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleResendInvitation(user)
+                                                }
+                                                disabled={
+                                                    resendingId === user.id
+                                                }
+                                                title="Resend Invitation"
+                                            >
+                                                {resendingId === user.id ? (
+                                                    <Loader2 className="size-4 animate-spin" />
+                                                ) : (
+                                                    <Mail className="size-4" />
+                                                )}
+                                            </Button>
+                                        )}
                                         {canImpersonate &&
                                             user.id !== currentUser.id && (
                                                 <Button
