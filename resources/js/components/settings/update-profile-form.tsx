@@ -15,6 +15,10 @@ export default function UpdateProfileForm({
 }: ProfilePageData) {
     const { auth } = usePage().props;
 
+    if (!auth.user) return null;
+
+    const user = auth.user;
+
     return (
         <div className="space-y-6">
             <Heading
@@ -38,7 +42,7 @@ export default function UpdateProfileForm({
                             <Input
                                 id="name"
                                 className="mt-1 block w-full"
-                                defaultValue={auth.user.name}
+                                defaultValue={user.name}
                                 name="name"
                                 required
                                 autoComplete="name"
@@ -58,7 +62,7 @@ export default function UpdateProfileForm({
                                 id="email"
                                 type="email"
                                 className="mt-1 block w-full"
-                                defaultValue={auth.user.email}
+                                defaultValue={user.email}
                                 name="email"
                                 required
                                 autoComplete="username"
@@ -71,29 +75,28 @@ export default function UpdateProfileForm({
                             />
                         </div>
 
-                        {mustVerifyEmail &&
-                            auth.user.email_verified_at === null && (
-                                <div>
-                                    <p className="-mt-4 text-sm text-muted-foreground">
-                                        Your email address is unverified.{' '}
-                                        <Link
-                                            href={send()}
-                                            as="button"
-                                            className="text-foreground underline decoration-muted-foreground/40 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
-                                        >
-                                            Click here to resend the
-                                            verification email.
-                                        </Link>
-                                    </p>
+                        {mustVerifyEmail && user.email_verified_at === null && (
+                            <div>
+                                <p className="-mt-4 text-sm text-muted-foreground">
+                                    Your email address is unverified.{' '}
+                                    <Link
+                                        href={send()}
+                                        as="button"
+                                        className="text-foreground underline decoration-muted-foreground/40 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
+                                    >
+                                        Click here to resend the verification
+                                        email.
+                                    </Link>
+                                </p>
 
-                                    {status === 'verification-link-sent' && (
-                                        <div className="mt-2 text-sm font-medium text-success">
-                                            A new verification link has been
-                                            sent to your email address.
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                {status === 'verification-link-sent' && (
+                                    <div className="mt-2 text-sm font-medium text-success">
+                                        A new verification link has been sent to
+                                        your email address.
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         <div className="flex items-center gap-4">
                             <Button
