@@ -1,5 +1,4 @@
 resources/js/components/ui/*
-resources/js/types/generated.d.ts
 resources/js/actions/*
 resources/js/routes/*
 resources/views/mail/*

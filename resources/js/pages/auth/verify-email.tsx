@@ -1,10 +1,12 @@
 import { Head } from '@inertiajs/react';
 import VerifyEmailForm from '@/components/auth/verify-email-form';
 import AuthLayout from '@/layouts/auth-layout';
+import type { PageProps } from '@/types';
+import type { VerifyEmailPageData } from '@/types/generated';
 
 export default function VerifyEmail({
     status,
-}: App.Features.Auth.Data.VerifyEmailPageData) {
+}: PageProps<VerifyEmailPageData>) {
     return (
         <AuthLayout
             title="Verify email"

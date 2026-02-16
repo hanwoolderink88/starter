@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { send } from '@/routes/verification';
+import type { ProfilePageData } from '@/types/generated';
 
 export default function UpdateProfileForm({
     mustVerifyEmail,
     status,
-}: App.Features.Settings.Data.ProfilePageData) {
+}: ProfilePageData) {
     const { auth } = usePage().props;
 
     return (

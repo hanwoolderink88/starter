@@ -6,9 +6,9 @@ use Carbon\CarbonInterface;
 use Spatie\LaravelTypeScriptTransformer\Transformers\DtoTransformer;
 use Spatie\LaravelTypeScriptTransformer\Transformers\SpatieStateTransformer;
 use Spatie\TypeScriptTransformer\Collectors\DefaultCollector;
-use Spatie\TypeScriptTransformer\Collectors\EnumCollector;
+use Spatie\TypeScriptTransformer\Formatters\PrettierFormatter;
 use Spatie\TypeScriptTransformer\Transformers\EnumTransformer;
-use Spatie\TypeScriptTransformer\Writers\TypeDefinitionWriter;
+use Spatie\TypeScriptTransformer\Writers\ModuleWriter;
 
 return [
     /*
@@ -28,7 +28,6 @@ return [
 
     'collectors' => [
         DefaultCollector::class,
-        EnumCollector::class,
     ],
 
     /*
@@ -60,7 +59,7 @@ return [
      * The package will write the generated TypeScript to this file.
      */
 
-    'output_file' => resource_path('js/types/generated.d.ts'),
+    'output_file' => resource_path('js/types/generated.ts'),
 
     /*
      * When the package is writing types to the output file, a writer is used to
@@ -68,7 +67,7 @@ return [
      * But you can also use the `ModuleWriter` or implement your own.
      */
 
-    'writer' => TypeDefinitionWriter::class,
+    'writer' => ModuleWriter::class,
 
     /*
      * The generated TypeScript file can be formatted. We ship a Prettier formatter
@@ -76,14 +75,14 @@ return [
      * The generated TypeScript will not be formatted when no formatter was set.
      */
 
-    'formatter' => null,
+    'formatter' => PrettierFormatter::class,
 
     /*
      * Enums can be transformed into types or native TypeScript enums, by default
      * the package will transform them to types.
      */
 
-    'transform_to_native_enums' => false,
+    'transform_to_native_enums' => true,
 
     /*
      * By default, this package will convert PHP nullable properties to TypeScript

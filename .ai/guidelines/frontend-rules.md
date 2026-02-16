@@ -76,12 +76,16 @@ Use shadcn design tokens (`bg-background`, `text-foreground`, `border-border`, `
 - Use the `cn()` utility from `lib/utils` for conditional class merging.
 - Avoid arbitrary values (`bg-[#123456]`) when a design token exists.
 
+## Node Commands
+
+Run `npm` and `npx` directly on the host machine — not through the Sail container. For example: `npm run dev`, `npx tsc --noEmit`, `npx shadcn@latest add <component>`.
+
 ## Code Quality Checks
 
 After completing any task that involves frontend code, you MUST run the following scripts in order:
 
-1. `vendor/bin/sail npm run lint` — Runs ESLint with auto-fix.
-2. `vendor/bin/sail npm run format` — Formats code with Prettier.
-3. `vendor/bin/sail npm run types` — Runs TypeScript type checking.
+1. `npm run lint` — Runs ESLint with auto-fix.
+2. `npm run format` — Formats code with Prettier.
+3. `npm run types` — Runs TypeScript type checking.
 
 All three must pass cleanly. Fix any issues they surface before considering the task complete.

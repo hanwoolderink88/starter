@@ -1,16 +1,8 @@
-import type { Auth } from '@/types/auth';
-
-type Permissions = {
-    viewUsers: boolean;
-};
+import type { SharedData } from '@/types/generated';
 
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
-        sharedPageProps: {
-            name: string;
-            auth: Auth;
-            permissions: Permissions;
-            sidebarOpen: boolean;
+        sharedPageProps: SharedData & {
             [key: string]: unknown;
         };
     }

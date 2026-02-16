@@ -3,7 +3,8 @@ import Heading from '@/components/heading';
 import CreateUserForm from '@/components/user-management/create-user-form';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/users';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PageProps } from '@/types';
+import type { UserFormPageData } from '@/types/generated';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,9 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function CreateUser({
-    roles,
-}: App.Features.UserManagement.Data.UserFormPageData) {
+export default function CreateUser({ roles }: PageProps<UserFormPageData>) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create User" />

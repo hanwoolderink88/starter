@@ -7,9 +7,8 @@ import DeleteUserDialog from '@/components/user-management/delete-user-dialog';
 import UsersTable from '@/components/user-management/users-table';
 import AppLayout from '@/layouts/app-layout';
 import { create, index } from '@/routes/users';
-import type { BreadcrumbItem } from '@/types';
-
-type UserManagementData = App.Features.UserManagement.Data.UserManagementData;
+import type { BreadcrumbItem, PageProps } from '@/types';
+import type { UserManagementData, UsersPageData } from '@/types/generated';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,7 +21,7 @@ export default function UsersIndex({
     users,
     canCreate,
     canImpersonate,
-}: App.Features.UserManagement.Data.UsersPageData) {
+}: PageProps<UsersPageData>) {
     const [deleteTarget, setDeleteTarget] = useState<UserManagementData | null>(
         null,
     );

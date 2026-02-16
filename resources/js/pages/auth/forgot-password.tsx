@@ -1,10 +1,12 @@
 import { Head } from '@inertiajs/react';
 import ForgotPasswordForm from '@/components/auth/forgot-password-form';
 import AuthLayout from '@/layouts/auth-layout';
+import type { PageProps } from '@/types';
+import type { ForgotPasswordPageData } from '@/types/generated';
 
 export default function ForgotPassword({
     status,
-}: App.Features.Auth.Data.ForgotPasswordPageData) {
+}: PageProps<ForgotPasswordPageData>) {
     return (
         <AuthLayout
             title="Forgot password"

@@ -3,12 +3,10 @@ import Heading from '@/components/heading';
 import EditUserForm from '@/components/user-management/edit-user-form';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/users';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PageProps } from '@/types';
+import type { UserFormPageData } from '@/types/generated';
 
-export default function EditUser({
-    user,
-    roles,
-}: App.Features.UserManagement.Data.UserFormPageData) {
+export default function EditUser({ user, roles }: PageProps<UserFormPageData>) {
     if (!user) return null;
 
     const breadcrumbs: BreadcrumbItem[] = [

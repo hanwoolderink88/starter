@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { NavFooter } from '@/components/nav-footer';
@@ -13,9 +13,11 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { usePermissions } from '@/hooks/use-permissions';
 import { dashboard } from '@/routes';
 import { index as usersIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
+import { Permission } from '@/types/generated';
 import AppLogo from './app-logo';
 
 const footerNavItems: NavItem[] = [
@@ -32,7 +34,7 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { permissions } = usePage().props;
+    const { can } = usePermissions();
 
     const mainNavItems = useMemo<NavItem[]>(() => {
         const items: NavItem[] = [
@@ -43,7 +45,7 @@ export function AppSidebar() {
             },
         ];
 
-        if (permissions.viewUsers) {
+        if (can(Permission.ViewUsers)) {
             items.push({
                 title: 'Users',
                 href: usersIndex(),
@@ -52,7 +54,7 @@ export function AppSidebar() {
         }
 
         return items;
-    }, [permissions.viewUsers]);
+    }, [can]);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

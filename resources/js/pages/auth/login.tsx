@@ -1,12 +1,14 @@
 import { Head } from '@inertiajs/react';
 import LoginForm from '@/components/auth/login-form';
 import AuthLayout from '@/layouts/auth-layout';
+import type { PageProps } from '@/types';
+import type { LoginPageData } from '@/types/generated';
 
 export default function Login({
     status,
     canResetPassword,
     canRegister,
-}: App.Features.Auth.Data.LoginPageData) {
+}: PageProps<LoginPageData>) {
     return (
         <AuthLayout
             title="Log in to your account"
