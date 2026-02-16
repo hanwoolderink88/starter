@@ -25,7 +25,6 @@ class StoreUserController extends Controller
         $this->userManagementService->store(
             $request->validated('name'),
             $request->validated('email'),
-            $request->validated('password'),
             Role::from($request->validated('role')),
         );
 

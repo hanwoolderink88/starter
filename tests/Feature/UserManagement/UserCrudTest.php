@@ -60,14 +60,13 @@ test('admins can create a user', function () {
     $this->post(route('users.store'), [
         'name' => 'New User',
         'email' => 'newuser@example.com',
-        'password' => 'password123!',
-        'password_confirmation' => 'password123!',
         'role' => Role::User->value,
     ])->assertRedirect(route('users.index'));
 
     $this->assertDatabaseHas('users', [
         'name' => 'New User',
         'email' => 'newuser@example.com',
+        'password' => null,
     ]);
 });
 
@@ -75,7 +74,7 @@ test('store validates required fields', function () {
     $this->actingAs(createAdmin());
 
     $this->post(route('users.store'), [])
-        ->assertSessionHasErrors(['name', 'email', 'password', 'role']);
+        ->assertSessionHasErrors(['name', 'email', 'role']);
 });
 
 test('store validates unique email', function () {
@@ -85,8 +84,6 @@ test('store validates unique email', function () {
     $this->post(route('users.store'), [
         'name' => 'Duplicate',
         'email' => $existing->email,
-        'password' => 'password123!',
-        'password_confirmation' => 'password123!',
         'role' => Role::User->value,
     ])->assertSessionHasErrors(['email']);
 });
@@ -138,8 +135,6 @@ test('regular users cannot create users', function () {
     $this->post(route('users.store'), [
         'name' => 'Test',
         'email' => 'test@example.com',
-        'password' => 'password123!',
-        'password_confirmation' => 'password123!',
         'role' => Role::User->value,
     ])->assertForbidden();
 });

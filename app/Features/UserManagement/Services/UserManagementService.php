@@ -7,7 +7,6 @@ namespace App\Features\UserManagement\Services;
 use App\Features\UserManagement\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Hash;
 
 class UserManagementService
 {
@@ -19,12 +18,11 @@ class UserManagementService
         return User::query()->with('roles')->orderBy('name')->get();
     }
 
-    public function store(string $name, string $email, string $password, Role $role): User
+    public function store(string $name, string $email, Role $role): User
     {
         $user = User::create([
             'name' => $name,
             'email' => $email,
-            'password' => Hash::make($password),
         ]);
 
         $user->assignRole($role);
