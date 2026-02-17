@@ -1,4 +1,3 @@
-import { Transition } from '@headlessui/react';
 import { Form } from '@inertiajs/react';
 import { useRef } from 'react';
 import PasswordController from '@/actions/App/Features/Settings/Controllers/PasswordController';
@@ -104,18 +103,9 @@ export default function UpdatePasswordForm() {
                             >
                                 Save password
                             </Button>
-
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
-                                <p className="text-sm text-muted-foreground">
-                                    Saved
-                                </p>
-                            </Transition>
+                            <p className="text-sm text-muted-foreground">
+                                Saved
+                            </p>
                         </div>
                     </>
                 )}
