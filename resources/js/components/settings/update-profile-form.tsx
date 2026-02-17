@@ -1,4 +1,3 @@
-import { Transition } from '@headlessui/react';
 import { Form, Link, usePage } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Features/Settings/Controllers/ProfileController';
 import Heading from '@/components/heading';
@@ -34,7 +33,7 @@ export default function UpdateProfileForm({
                 }}
                 className="space-y-6"
             >
-                {({ processing, recentlySuccessful, errors }) => (
+                {({ processing, errors }) => (
                     <>
                         <div className="grid gap-2">
                             <Label htmlFor="name">Name</Label>
@@ -105,18 +104,9 @@ export default function UpdateProfileForm({
                             >
                                 Save
                             </Button>
-
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
-                                <p className="text-sm text-muted-foreground">
-                                    Saved
-                                </p>
-                            </Transition>
+                            <p className="text-sm text-muted-foreground">
+                                Saved
+                            </p>
                         </div>
                     </>
                 )}
