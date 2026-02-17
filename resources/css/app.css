@@ -148,3 +148,108 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* View Transitions API - Content area scoping */
+[data-slot='sidebar-inset'] {
+    view-transition-name: main-content;
+}
+
+/* Fade animations */
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Slide animations */
+@keyframes slide-out-left {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+}
+
+@keyframes slide-in-from-right {
+    from {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out-right {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+}
+
+@keyframes slide-in-from-left {
+    from {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Fade transition rules */
+[data-transition='fade']::view-transition-old(main-content) {
+    animation: fade-out 200ms ease;
+}
+
+[data-transition='fade']::view-transition-new(main-content) {
+    animation: fade-in 200ms ease;
+}
+
+/* Slide forward transition rules */
+[data-transition='slide-forward']::view-transition-old(main-content) {
+    animation: slide-out-left 250ms ease;
+}
+
+[data-transition='slide-forward']::view-transition-new(main-content) {
+    animation: slide-in-from-right 250ms ease;
+}
+
+/* Slide back transition rules */
+[data-transition='slide-back']::view-transition-old(main-content) {
+    animation: slide-out-right 250ms ease;
+}
+
+[data-transition='slide-back']::view-transition-new(main-content) {
+    animation: slide-in-from-left 250ms ease;
+}
+
+/* Accessibility - respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}
