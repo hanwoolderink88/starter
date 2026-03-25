@@ -3,20 +3,21 @@
         "opencode"
     ],
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
+    "nightwatch_mcp": false,
     "packages": [
         "laravel/fortify",
         "spatie/laravel-permission"
     ],
-    "sail": true,
+    "sail": false,
     "skills": [
+        "laravel-best-practices",
         "wayfinder-development",
         "mcp-development",
         "pest-testing",
         "inertia-react-development",
         "tailwindcss-development",
-        "developing-with-fortify",
+        "fortify-development",
         "laravel-permission-development"
     ]
 }
