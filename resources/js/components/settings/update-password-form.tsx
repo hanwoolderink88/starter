@@ -103,9 +103,11 @@ export default function UpdatePasswordForm() {
                             >
                                 Save password
                             </Button>
-                            <p className="text-sm text-muted-foreground">
-                                Saved
-                            </p>
+                            {recentlySuccessful && (
+                                <p className="text-sm text-muted-foreground">
+                                    Saved
+                                </p>
+                            )}
                         </div>
                     </>
                 )}
