@@ -28,7 +28,7 @@ yarn-error.log
 /.zed
 
 # AI tools (generated/local state)
-AGENTS.md
+/.ai/plans
 /.agents
 /.cursor
 /.opencode
@@ -39,6 +39,13 @@ AGENTS.md
 /.continue
 /.aider*
 /.copilot
+/.claude
 /.sisyphus
-opencode.json
 /s
+
+opencode.json
+
+.mcp.json
+CLAUDE.md
+AGENTS.md
+boost.json
