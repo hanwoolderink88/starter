@@ -8,6 +8,7 @@ use App\Features\Auth\Actions\CreateNewUser;
 use App\Features\Auth\Actions\ResetUserPassword;
 use App\Features\Auth\Data\ForgotPasswordPageData;
 use App\Features\Auth\Data\LoginPageData;
+use App\Features\Auth\Data\RegisterPageData;
 use App\Features\Auth\Data\ResetPasswordPageData;
 use App\Features\Auth\Data\VerifyEmailPageData;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
@@ -64,6 +66,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', new ResetPasswordPageData(
             email: $request->email,
             token: $request->route('token'),
+            passwordRules: $this->passwordRules(),
         )));
 
         Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/forgot-password', new ForgotPasswordPageData(
@@ -74,11 +77,24 @@ class FortifyServiceProvider extends ServiceProvider
             status: $request->session()->get('status'),
         )));
 
-        Fortify::registerView(fn () => Inertia::render('auth/register'));
+        Fortify::registerView(fn () => Inertia::render('auth/register', new RegisterPageData(
+            passwordRules: $this->passwordRules(),
+        )));
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
 
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/confirm-password'));
+    }
+
+    /**
+     * Get the default password rules as a passwordrules attribute string.
+     */
+    private function passwordRules(): string
+    {
+        $password = Password::defaults();
+        assert($password instanceof Password);
+
+        return $password->toPasswordRulesString();
     }
 
     /**

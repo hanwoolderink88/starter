@@ -7,7 +7,13 @@ import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
-export default function UpdatePasswordForm() {
+type UpdatePasswordFormProps = {
+    passwordRules: string;
+};
+
+export default function UpdatePasswordForm({
+    passwordRules,
+}: UpdatePasswordFormProps) {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
@@ -70,6 +76,7 @@ export default function UpdatePasswordForm() {
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 placeholder="New password"
+                                passwordrules={passwordRules}
                             />
 
                             <InputError message={errors.password} />
@@ -86,6 +93,7 @@ export default function UpdatePasswordForm() {
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 placeholder="Confirm password"
+                                passwordrules={passwordRules}
                             />
 
                             <InputError

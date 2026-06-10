@@ -2,17 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Features\Auth\Data;
+namespace App\Features\Settings\Data;
 
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
-class ResetPasswordPageData extends Data
+class PasswordPageData extends Data
 {
     public function __construct(
-        public string $token,
         public string $passwordRules,
-        public ?string $email = null,
     ) {}
 }

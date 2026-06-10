@@ -8,11 +8,9 @@ use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
 #[TypeScript]
-class ResetPasswordPageData extends Data
+class RegisterPageData extends Data
 {
     public function __construct(
-        public string $token,
         public string $passwordRules,
-        public ?string $email = null,
     ) {}
 }
