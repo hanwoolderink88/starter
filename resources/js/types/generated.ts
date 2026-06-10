@@ -125,6 +125,7 @@ export type UserManagementData = {
     email: string;
     email_verified_at: string | null;
     created_at: string;
+    created_at_display: string;
     role: string;
     has_password: boolean;
 };
