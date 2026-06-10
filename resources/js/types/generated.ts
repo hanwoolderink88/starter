@@ -1,14 +1,67 @@
 export type AuthData = {
     user: UserData | null;
 };
+export type CursorPaginatedDataCollection<TKey, TValue> = CursorPaginator<
+    TKey,
+    TValue
+>;
+export type CursorPaginator<TKey, TValue> = {
+    data: TKey extends string ? Record<TKey, TValue> : TValue[];
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+    meta: {
+        path: string;
+        per_page: number;
+        next_cursor: string | null;
+        next_page_url: string | null;
+        prev_cursor: string | null;
+        prev_page_url: string | null;
+    };
+};
+export type CursorPaginatorInterface<TKey, TValue> = CursorPaginator<
+    TKey,
+    TValue
+>;
 export type ForgotPasswordPageData = {
     status: string | null;
 };
+export type LengthAwarePaginator<TKey, TValue> = {
+    data: TKey extends string ? Record<TKey, TValue> : TValue[];
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+    meta: {
+        total: number;
+        current_page: number;
+        first_page_url: string;
+        from: number | null;
+        last_page: number;
+        last_page_url: string;
+        next_page_url: string | null;
+        path: string;
+        per_page: number;
+        prev_page_url: string | null;
+        to: number | null;
+    };
+};
+export type LengthAwarePaginatorInterface<TKey, TValue> = LengthAwarePaginator<
+    TKey,
+    TValue
+>;
 export type LoginPageData = {
     canResetPassword: boolean;
     canRegister: boolean;
     status: string | null;
 };
+export type PaginatedDataCollection<TKey, TValue> = LengthAwarePaginator<
+    TKey,
+    TValue
+>;
 export enum Permission {
     ViewUsers = 'view users',
     CreateUsers = 'create users',
@@ -31,7 +84,7 @@ export enum Role {
 export type SharedData = {
     name: string;
     auth: AuthData;
-    permissions: Array<Permission>;
+    permissions: Permission[];
     sidebarOpen: boolean;
 };
 export type TwoFactorPageData = {
@@ -57,7 +110,7 @@ export type UserData = {
 };
 export type UserFormPageData = {
     user: UserManagementData | null;
-    roles: Array<any>;
+    roles: Record<string, string>;
 };
 export type UserManagementData = {
     id: number;
@@ -69,7 +122,7 @@ export type UserManagementData = {
     has_password: boolean;
 };
 export type UsersPageData = {
-    users: any;
+    users: UserManagementData[];
     canCreate: boolean;
     canImpersonate: boolean;
 };
