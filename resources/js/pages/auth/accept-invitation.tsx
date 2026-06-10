@@ -2,8 +2,8 @@ import { Head, useForm } from '@inertiajs/react';
 import type { FormEventHandler } from 'react';
 import StoreAcceptInvitation from '@/actions/App/Features/UserManagement/Controllers/StoreAcceptInvitationController';
 import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
@@ -38,9 +38,8 @@ export default function AcceptInvitation({ user }: Props) {
             <form onSubmit={submit} className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
+                    <PasswordInput
                         id="password"
-                        type="password"
                         name="password"
                         value={data.password}
                         className="block w-full"
@@ -55,9 +54,8 @@ export default function AcceptInvitation({ user }: Props) {
                     <Label htmlFor="password_confirmation">
                         Confirm Password
                     </Label>
-                    <Input
+                    <PasswordInput
                         id="password_confirmation"
-                        type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
                         className="block w-full"
