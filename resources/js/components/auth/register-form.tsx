@@ -1,5 +1,6 @@
 import { Form } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,9 +54,8 @@ export default function RegisterForm() {
 
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input
+                            <PasswordInput
                                 id="password"
-                                type="password"
                                 required
                                 tabIndex={3}
                                 autoComplete="new-password"
@@ -69,9 +69,8 @@ export default function RegisterForm() {
                             <Label htmlFor="password_confirmation">
                                 Confirm password
                             </Label>
-                            <Input
+                            <PasswordInput
                                 id="password_confirmation"
-                                type="password"
                                 required
                                 tabIndex={4}
                                 autoComplete="new-password"
