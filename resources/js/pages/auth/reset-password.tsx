@@ -7,6 +7,7 @@ import type { ResetPasswordPageData } from '@/types/generated';
 export default function ResetPassword({
     token,
     email,
+    passwordRules,
 }: PageProps<ResetPasswordPageData>) {
     return (
         <AuthLayout
@@ -14,7 +15,11 @@ export default function ResetPassword({
             description="Please enter your new password below"
         >
             <Head title="Reset password" />
-            <ResetPasswordForm token={token} email={email} />
+            <ResetPasswordForm
+                token={token}
+                email={email}
+                passwordRules={passwordRules}
+            />
         </AuthLayout>
     );
 }

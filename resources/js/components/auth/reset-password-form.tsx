@@ -10,11 +10,13 @@ import { update } from '@/routes/password';
 type ResetPasswordFormProps = {
     token: string;
     email: string | null;
+    passwordRules: string;
 };
 
 export default function ResetPasswordForm({
     token,
     email,
+    passwordRules,
 }: ResetPasswordFormProps) {
     return (
         <Form
@@ -47,6 +49,7 @@ export default function ResetPasswordForm({
                             className="mt-1 block w-full"
                             autoFocus
                             placeholder="Password"
+                            passwordrules={passwordRules}
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -61,6 +64,7 @@ export default function ResetPasswordForm({
                             autoComplete="new-password"
                             className="mt-1 block w-full"
                             placeholder="Confirm password"
+                            passwordrules={passwordRules}
                         />
                         <InputError
                             message={errors.password_confirmation}

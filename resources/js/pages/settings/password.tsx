@@ -3,7 +3,8 @@ import UpdatePasswordForm from '@/components/settings/update-password-form';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/user-password';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, PageProps } from '@/types';
+import type { PasswordPageData } from '@/types/generated';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -12,7 +13,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Password() {
+export default function Password({
+    passwordRules,
+}: PageProps<PasswordPageData>) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Password settings" />
@@ -20,7 +23,7 @@ export default function Password() {
             <h1 className="sr-only">Password Settings</h1>
 
             <SettingsLayout>
-                <UpdatePasswordForm />
+                <UpdatePasswordForm passwordRules={passwordRules} />
             </SettingsLayout>
         </AppLayout>
     );

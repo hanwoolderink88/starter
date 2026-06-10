@@ -12,6 +12,7 @@ class ResetPasswordPageData extends Data
 {
     public function __construct(
         public string $token,
+        public string $passwordRules,
         public ?string $email = null,
     ) {}
 }

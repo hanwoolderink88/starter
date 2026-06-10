@@ -62,6 +62,9 @@ export type PaginatedDataCollection<TKey, TValue> = LengthAwarePaginator<
     TKey,
     TValue
 >;
+export type PasswordPageData = {
+    passwordRules: string;
+};
 export enum Permission {
     ViewUsers = 'view users',
     CreateUsers = 'create users',
@@ -73,8 +76,12 @@ export type ProfilePageData = {
     mustVerifyEmail: boolean;
     status: string | null;
 };
+export type RegisterPageData = {
+    passwordRules: string;
+};
 export type ResetPasswordPageData = {
     token: string;
+    passwordRules: string;
     email: string | null;
 };
 export enum Role {
