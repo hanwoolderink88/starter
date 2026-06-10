@@ -1,9 +1,6 @@
-import { createInertiaApp, type ResolvedComponent } from '@inertiajs/react';
+import { createInertiaApp } from '@inertiajs/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { Toaster } from './components/ui/sonner';
 import { initializeTheme } from './hooks/use-appearance';
@@ -37,27 +34,20 @@ function getTransitionType(
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) =>
-        resolvePageComponent(
-            `./pages/${name}.tsx`,
-            import.meta.glob<ResolvedComponent>('./pages/**/*.tsx'),
-        ),
-    setup({ el, App, props }) {
-        // Lazy initialization: create QueryClient once and reuse across Inertia navigations
-        if (!queryClient) {
-            queryClient = makeQueryClient();
-        }
+    strictMode: true,
+    withApp(app) {
+        // On the SSR server every request gets a fresh QueryClient; in the
+        // browser a single client is reused across Inertia navigations.
+        const client = import.meta.env.SSR
+            ? makeQueryClient()
+            : (queryClient ??= makeQueryClient());
 
-        const root = createRoot(el);
-
-        root.render(
-            <StrictMode>
-                <QueryClientProvider client={queryClient}>
-                    <App {...props} />
-                    <Toaster />
-                    <ReactQueryDevtools initialIsOpen={false} />
-                </QueryClientProvider>
-            </StrictMode>,
+        return (
+            <QueryClientProvider client={client}>
+                {app}
+                <Toaster />
+                <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
         );
     },
     progress: {

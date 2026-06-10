@@ -29,6 +29,14 @@ return [
 
         'url' => env('INERTIA_SSR_URL', 'http://127.0.0.1:13714'),
 
+        /*
+         * Overrides the Vite dev-server URL used for dev-mode SSR requests.
+         * Needed when the app runs in a container (Sail) while the Vite dev
+         * server runs on the host — the hot file's browser-facing localhost
+         * URL is not reachable from inside the container.
+         */
+        'hot_url' => env('INERTIA_SSR_HOT_URL'),
+
         'ensure_bundle_exists' => (bool) env('INERTIA_SSR_ENSURE_BUNDLE_EXISTS', true),
 
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),

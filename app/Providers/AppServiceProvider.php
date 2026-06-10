@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Policies\UserPolicy;
+use App\Http\Inertia\SailSsrGateway;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Inertia\Ssr\Gateway;
 use Override;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-        //
+        $this->app->bind(Gateway::class, SailSsrGateway::class);
     }
 
     /**
