@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
+import { Toaster } from './components/ui/sonner';
 import { initializeTheme } from './hooks/use-appearance';
 import { makeQueryClient } from './lib/query-client';
 
@@ -53,6 +54,7 @@ createInertiaApp({
             <StrictMode>
                 <QueryClientProvider client={queryClient}>
                     <App {...props} />
+                    <Toaster />
                     <ReactQueryDevtools initialIsOpen={false} />
                 </QueryClientProvider>
             </StrictMode>,

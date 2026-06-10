@@ -49,7 +49,9 @@ class ProfileController extends Controller
             $request->validated('email'),
         );
 
-        return to_route('profile.edit');
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
+
+        return redirect()->route('profile.edit');
     }
 
     /**

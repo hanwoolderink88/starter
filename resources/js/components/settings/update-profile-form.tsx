@@ -104,9 +104,6 @@ export default function UpdateProfileForm({
                             >
                                 Save
                             </Button>
-                            <p className="text-sm text-muted-foreground">
-                                Saved
-                            </p>
                         </div>
                     </>
                 )}

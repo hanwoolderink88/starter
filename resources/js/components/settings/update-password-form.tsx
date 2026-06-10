@@ -41,7 +41,7 @@ export default function UpdatePasswordForm() {
                 }}
                 className="space-y-6"
             >
-                {({ errors, processing, recentlySuccessful }) => (
+                {({ errors, processing }) => (
                     <>
                         <div className="grid gap-2">
                             <Label htmlFor="current_password">
@@ -100,11 +100,6 @@ export default function UpdatePasswordForm() {
                             >
                                 Save password
                             </Button>
-                            {recentlySuccessful && (
-                                <p className="text-sm text-muted-foreground">
-                                    Saved
-                                </p>
-                            )}
                         </div>
                     </>
                 )}
