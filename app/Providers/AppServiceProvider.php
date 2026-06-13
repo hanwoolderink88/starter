@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Ssr\Gateway;
+use Laravel\Passport\Passport;
 use Override;
 
 class AppServiceProvider extends ServiceProvider
@@ -36,6 +37,15 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureSuperAdmin();
         $this->configurePolicies();
+        $this->configurePassport();
+    }
+
+    /**
+     * Use the MCP-provided consent screen for OAuth authorization requests.
+     */
+    protected function configurePassport(): void
+    {
+        Passport::authorizationView(fn (array $parameters) => response()->view('mcp.authorize', $parameters));
     }
 
     protected function configurePolicies(): void
