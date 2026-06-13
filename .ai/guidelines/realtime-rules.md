@@ -50,14 +50,16 @@ class ResourceChangedData extends Data
 
 Each feature owns a single `{Model}Changed` event in its `Events/` directory carrying a `ResourceAction` — one event per model, not one per verb, so the frontend subscribes once and switches on the action.
 
-- Implement `ShouldBroadcast` (queued — ensure a queue worker runs).
+- Implement `ShouldBroadcastNow`. These signals are tiny, so dispatch them synchronously in the request rather than queuing: it guarantees the broadcast fires immediately (no waiting on a busy or absent queue worker) and the only cost — a fast local publish to Reverb — is negligible for a five-field payload. Reserve queued `ShouldBroadcast` for heavy or high-volume events. If a mutation is ever wrapped in a DB transaction, also implement `ShouldDispatchAfterCommit` so the broadcast waits for the commit.
 - Broadcast on a **private** channel.
 - Set `broadcastAs()` to a stable name so the frontend listener does not depend on the class namespace.
 
 ```php
 // app/Features/UserManagement/Events/UserChanged.php
-class UserChanged implements ShouldBroadcast
+class UserChanged implements ShouldBroadcastNow
 {
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
     public function __construct(public ResourceChangedData $payload) {}
 
     public function broadcastOn(): PrivateChannel
@@ -80,20 +82,22 @@ class UserChanged implements ShouldBroadcast
 
 ## Dispatching
 
-Broadcasting is a **side effect**, so it belongs in the **Action**, never the Service (Services persist only — see the backend rules). Dispatch after the Service has persisted.
+Broadcasting is a **side effect**, so it belongs in the **Action**, never the Service (Services persist only — see the backend rules). Dispatch after the Service has persisted, and pass the acting user in as a parameter rather than reading global state.
+
+Dispatch with `Event::dispatch` (`{Model}Changed::dispatch(...)`), not the `broadcast()` helper: the dispatcher auto-broadcasts events implementing `ShouldBroadcast*` (so the behaviour is identical), and unlike `broadcast()` it can be asserted with `Event::fake()` in tests.
 
 ```php
-public function handle(UserData $data): User
+public function handle(UserData $data, User $actor): User
 {
     $user = $this->userService->store($data);
 
-    broadcast(new UserChanged(new ResourceChangedData(
+    UserChanged::dispatch(new ResourceChangedData(
         action: ResourceAction::Created,
         id: $user->id,
         label: $user->name,
-        actorId: auth()->id(),
-        actorName: auth()->user()->name,
-    )));
+        actorId: $actor->id,
+        actorName: $actor->name,
+    ));
 
     return $user;
 }

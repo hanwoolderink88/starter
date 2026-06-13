@@ -44,7 +44,38 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+use App\Features\UserManagement\Enums\Permission;
+use App\Features\UserManagement\Enums\Role;
+use App\Models\User;
+use Spatie\Permission\Models\Permission as PermissionModel;
+use Spatie\Permission\Models\Role as RoleModel;
+
+/**
+ * Seed the UserManagement roles and permissions used across feature tests.
+ */
+function seedUserRolesAndPermissions(): void
 {
-    // ..
+    foreach (Permission::cases() as $permission) {
+        PermissionModel::findOrCreate($permission->value, 'web');
+    }
+
+    $superAdminRole = RoleModel::findOrCreate(Role::SuperAdmin->value, 'web');
+    $superAdminRole->givePermissionTo(PermissionModel::all());
+    RoleModel::findOrCreate(Role::User->value, 'web');
+}
+
+function createAdmin(): User
+{
+    $admin = User::factory()->create();
+    $admin->assignRole(Role::SuperAdmin);
+
+    return $admin;
+}
+
+function createRegularUser(): User
+{
+    $user = User::factory()->create();
+    $user->assignRole(Role::User);
+
+    return $user;
 }

@@ -84,6 +84,18 @@ export type ResetPasswordPageData = {
     passwordRules: string;
     email: string | null;
 };
+export enum ResourceAction {
+    Created = 'created',
+    Updated = 'updated',
+    Deleted = 'deleted',
+}
+export type ResourceChangedData = {
+    action: ResourceAction;
+    id: number;
+    label: string;
+    actorId: number;
+    actorName: string;
+};
 export enum Role {
     User = 'user',
     SuperAdmin = 'super-admin',
@@ -94,6 +106,14 @@ export type SharedData = {
     permissions: Permission[];
     sidebarOpen: boolean;
 };
+export type ShowUserPageData = {
+    user: UserManagementData;
+    canUpdate: boolean;
+};
+export enum SortDirection {
+    Asc = 'asc',
+    Desc = 'desc',
+}
 export type TwoFactorPageData = {
     twoFactorEnabled: boolean;
     requiresConfirmation: boolean;
@@ -115,6 +135,11 @@ export type UserData = {
     created_at: string;
     updated_at: string;
 };
+export type UserFiltersData = {
+    search: string | null;
+    role: Role | null;
+    status: UserStatus | null;
+};
 export type UserFormPageData = {
     user: UserManagementData | null;
     roles: Record<string, string>;
@@ -129,8 +154,25 @@ export type UserManagementData = {
     role: string;
     has_password: boolean;
 };
+export enum UserSortColumn {
+    Name = 'name',
+    Email = 'email',
+    CreatedAt = 'created_at',
+}
+export type UserSortData = {
+    column: UserSortColumn;
+    direction: SortDirection;
+};
+export enum UserStatus {
+    Active = 'active',
+    Invited = 'invited',
+}
 export type UsersPageData = {
-    users: UserManagementData[];
+    users: PaginatedDataCollection<number, UserManagementData>;
+    filters: UserFiltersData;
+    sort: UserSortData;
+    roleOptions: Record<string, string>;
+    statusOptions: Record<string, string>;
     canCreate: boolean;
     canImpersonate: boolean;
 };

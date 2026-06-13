@@ -1,38 +1,13 @@
 <?php
 
-use App\Features\UserManagement\Enums\Permission;
 use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Notifications\InvitationNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
-use Spatie\Permission\Models\Permission as PermissionModel;
-use Spatie\Permission\Models\Role as RoleModel;
 
 beforeEach(function () {
-    foreach (Permission::cases() as $permission) {
-        PermissionModel::findOrCreate($permission->value, 'web');
-    }
-
-    $superAdminRole = RoleModel::findOrCreate(Role::SuperAdmin->value, 'web');
-    $superAdminRole->givePermissionTo(PermissionModel::all());
-    RoleModel::findOrCreate(Role::User->value, 'web');
+    seedUserRolesAndPermissions();
 });
-
-function createAdmin(): User
-{
-    $admin = User::factory()->create();
-    $admin->assignRole(Role::SuperAdmin);
-
-    return $admin;
-}
-
-function createRegularUser(): User
-{
-    $user = User::factory()->create();
-    $user->assignRole(Role::User);
-
-    return $user;
-}
 
 test('guests cannot access users index', function () {
     $this->get(route('users.index'))->assertRedirect(route('login'));
