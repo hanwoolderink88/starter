@@ -1,0 +1,14 @@
+diff --git a/node_modules/@inertiajs/vite/dist/index.js b/node_modules/@inertiajs/vite/dist/index.js
+index 9263e9e..678f7b1 100644
+--- a/node_modules/@inertiajs/vite/dist/index.js
++++ b/node_modules/@inertiajs/vite/dist/index.js
+@@ -433,6 +433,9 @@ function isCSSRequest(url) {
+   return CSS_EXTENSIONS.test(url);
+ }
+ function resolveDevServerOrigin(server) {
++  if (server.config.server.origin) {
++    return server.config.server.origin;
++  }
+   const url = server.resolvedUrls?.local[0] ?? server.resolvedUrls?.network[0];
+   if (url) {
+     return new URL(url).origin;
