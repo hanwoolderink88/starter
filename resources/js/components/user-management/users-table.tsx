@@ -1,5 +1,15 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { Loader2, Mail, Pencil, UserCheck } from 'lucide-react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
+import {
+    ChevronDown,
+    ChevronsUpDown,
+    ChevronUp,
+    Loader2,
+    Mail,
+    Pencil,
+    Trash2,
+    UserCheck,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,18 +22,69 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { edit, impersonate, resendInvitation } from '@/routes/users';
-import type { UserManagementData } from '@/types/generated';
+import WithTooltip from '@/components/with-tooltip';
+import { edit, impersonate, resendInvitation, show } from '@/routes/users';
+import {
+    SortDirection,
+    UserSortColumn,
+    type UserManagementData,
+    type UserSortData,
+} from '@/types/generated';
+
+function SortableHead({
+    column,
+    label,
+    sort,
+    onSort,
+    className,
+}: {
+    column: UserSortColumn;
+    label: string;
+    sort: UserSortData;
+    onSort: (column: UserSortColumn) => void;
+    className?: string;
+}) {
+    const active = sort.column === column;
+
+    return (
+        <TableHead className={className}>
+            <button
+                type="button"
+                onClick={() => onSort(column)}
+                className="-ml-1 inline-flex items-center gap-1 rounded px-1 py-0.5 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                aria-label={label}
+            >
+                {label}
+                {active ? (
+                    sort.direction === SortDirection.Asc ? (
+                        <ChevronUp className="size-3.5" />
+                    ) : (
+                        <ChevronDown className="size-3.5" />
+                    )
+                ) : (
+                    <ChevronsUpDown className="size-3.5 opacity-50" />
+                )}
+            </button>
+        </TableHead>
+    );
+}
 
 export default function UsersTable({
     users,
+    roleOptions,
+    sort,
     canImpersonate,
+    onSort,
     onDeleteRequest,
 }: {
     users: UserManagementData[];
+    roleOptions: Record<string, string>;
+    sort: UserSortData;
     canImpersonate: boolean;
+    onSort: (column: UserSortColumn) => void;
     onDeleteRequest: (user: UserManagementData) => void;
 }) {
+    const { t } = useLaravelReactI18n();
     const { auth } = usePage().props;
     const [resendingId, setResendingId] = useState<number | null>(null);
 
@@ -43,7 +104,6 @@ export default function UsersTable({
                 preserveScroll: true,
                 onStart: () => setResendingId(user.id),
                 onFinish: () => setResendingId(null),
-                onSuccess: () => {},
             },
         );
     }
@@ -54,13 +114,34 @@ export default function UsersTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Created</TableHead>
+                            <SortableHead
+                                column={UserSortColumn.Name}
+                                label={t('users.columns.name')}
+                                sort={sort}
+                                onSort={onSort}
+                            />
+                            <SortableHead
+                                column={UserSortColumn.Email}
+                                label={t('users.columns.email')}
+                                sort={sort}
+                                onSort={onSort}
+                                className="hidden sm:table-cell"
+                            />
+                            <TableHead className="hidden md:table-cell">
+                                {t('users.columns.role')}
+                            </TableHead>
+                            <TableHead className="hidden md:table-cell">
+                                {t('users.columns.status')}
+                            </TableHead>
+                            <SortableHead
+                                column={UserSortColumn.CreatedAt}
+                                label={t('users.columns.created')}
+                                sort={sort}
+                                onSort={onSort}
+                                className="hidden md:table-cell"
+                            />
                             <TableHead className="text-right">
-                                Actions
+                                {t('users.columns.actions')}
                             </TableHead>
                         </TableRow>
                     </TableHeader>
@@ -71,17 +152,31 @@ export default function UsersTable({
                                     colSpan={6}
                                     className="py-8 text-center text-muted-foreground"
                                 >
-                                    No users found.
+                                    {t('users.empty')}
                                 </TableCell>
                             </TableRow>
                         )}
                         {users.map((user: UserManagementData) => (
-                            <TableRow key={user.id}>
+                            <TableRow
+                                key={user.id}
+                                onClick={() => router.visit(show(user.id).url)}
+                                className="cursor-pointer"
+                            >
                                 <TableCell className="font-medium">
-                                    {user.name}
+                                    {/* Real link so the row's default action is
+                                        keyboard- and screen-reader-accessible. */}
+                                    <Link
+                                        href={show(user.id)}
+                                        className="hover:underline focus-visible:underline focus-visible:outline-none"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {user.name}
+                                    </Link>
                                 </TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>
+                                <TableCell className="hidden sm:table-cell">
+                                    {user.email}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
                                     <Badge
                                         variant={
                                             user.role === 'super-admin'
@@ -89,10 +184,10 @@ export default function UsersTable({
                                                 : 'secondary'
                                         }
                                     >
-                                        {user.role}
+                                        {roleOptions[user.role] ?? user.role}
                                     </Badge>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="hidden md:table-cell">
                                     <Badge
                                         variant={
                                             user.has_password
@@ -101,65 +196,118 @@ export default function UsersTable({
                                         }
                                     >
                                         {user.has_password
-                                            ? 'Active'
-                                            : 'Invited'}
+                                            ? t('users.status.active')
+                                            : t('users.status.invited')}
                                     </Badge>
                                 </TableCell>
-                                <TableCell>{user.created_at_display}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex items-center justify-end gap-1">
-                                        {!user.has_password && (
+                                <TableCell className="hidden md:table-cell">
+                                    {user.created_at_display}
+                                </TableCell>
+                                <TableCell
+                                    className="text-right"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="flex items-center justify-end gap-0.5">
+                                        <WithTooltip
+                                            label={t('users.actions.edit')}
+                                        >
                                             <Button
                                                 variant="ghost"
-                                                size="sm"
-                                                onClick={() =>
-                                                    handleResendInvitation(user)
-                                                }
-                                                disabled={
-                                                    resendingId === user.id
-                                                }
-                                                title="Resend Invitation"
-                                            >
-                                                {resendingId === user.id ? (
-                                                    <Loader2 className="size-4 animate-spin" />
-                                                ) : (
-                                                    <Mail className="size-4" />
+                                                size="icon"
+                                                className="size-8"
+                                                aria-label={t(
+                                                    'users.actions.edit',
                                                 )}
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={edit(user.id)}
+                                                    prefetch
+                                                    cacheTags={[
+                                                        `user.${user.id}`,
+                                                    ]}
+                                                >
+                                                    <Pencil className="size-4" />
+                                                </Link>
                                             </Button>
-                                        )}
-                                        {canImpersonate &&
-                                            user.id !== currentUser.id && (
+                                        </WithTooltip>
+
+                                        {!user.has_password && (
+                                            <WithTooltip
+                                                label={t(
+                                                    'users.actions.resend_invitation',
+                                                )}
+                                            >
                                                 <Button
                                                     variant="ghost"
-                                                    size="sm"
+                                                    size="icon"
+                                                    className="size-8"
+                                                    aria-label={t(
+                                                        'users.actions.resend_invitation',
+                                                    )}
                                                     onClick={() =>
-                                                        handleImpersonate(user)
+                                                        handleResendInvitation(
+                                                            user,
+                                                        )
                                                     }
-                                                    title="Impersonate"
+                                                    disabled={
+                                                        resendingId === user.id
+                                                    }
                                                 >
-                                                    <UserCheck className="size-4" />
+                                                    {resendingId === user.id ? (
+                                                        <Loader2 className="size-4 animate-spin" />
+                                                    ) : (
+                                                        <Mail className="size-4" />
+                                                    )}
                                                 </Button>
+                                            </WithTooltip>
+                                        )}
+
+                                        {canImpersonate &&
+                                            user.id !== currentUser.id && (
+                                                <WithTooltip
+                                                    label={t(
+                                                        'users.actions.impersonate',
+                                                    )}
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8"
+                                                        aria-label={t(
+                                                            'users.actions.impersonate',
+                                                        )}
+                                                        onClick={() =>
+                                                            handleImpersonate(
+                                                                user,
+                                                            )
+                                                        }
+                                                    >
+                                                        <UserCheck className="size-4" />
+                                                    </Button>
+                                                </WithTooltip>
                                             )}
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            asChild
-                                        >
-                                            <Link href={edit(user.id)} prefetch>
-                                                <Pencil className="size-4" />
-                                            </Link>
-                                        </Button>
+
                                         {user.id !== currentUser.id && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive"
-                                                onClick={() =>
-                                                    onDeleteRequest(user)
-                                                }
+                                            <WithTooltip
+                                                label={t(
+                                                    'users.actions.delete',
+                                                )}
                                             >
-                                                Delete
-                                            </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-8 text-destructive hover:text-destructive"
+                                                    aria-label={t(
+                                                        'users.actions.delete',
+                                                    )}
+                                                    onClick={() =>
+                                                        onDeleteRequest(user)
+                                                    }
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </Button>
+                                            </WithTooltip>
                                         )}
                                     </div>
                                 </TableCell>

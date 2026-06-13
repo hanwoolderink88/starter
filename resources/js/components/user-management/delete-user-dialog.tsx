@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -18,6 +19,8 @@ export default function DeleteUserDialog({
     user: UserManagementData | null;
     onClose: () => void;
 }) {
+    const { t } = useLaravelReactI18n();
+
     function handleDelete() {
         if (!user) return;
 
@@ -32,17 +35,20 @@ export default function DeleteUserDialog({
             onOpenChange={(open) => !open && onClose()}
         >
             <DialogContent>
-                <DialogTitle>Delete user</DialogTitle>
+                <DialogTitle>{t('users.delete_dialog.title')}</DialogTitle>
                 <DialogDescription>
-                    Are you sure you want to delete{' '}
-                    <strong>{user?.name}</strong>? This action cannot be undone.
+                    {t('users.delete_dialog.description', {
+                        name: user?.name ?? '',
+                    })}
                 </DialogDescription>
                 <DialogFooter className="gap-2">
                     <DialogClose asChild>
-                        <Button variant="secondary">Cancel</Button>
+                        <Button variant="secondary">
+                            {t('users.delete_dialog.cancel')}
+                        </Button>
                     </DialogClose>
                     <Button variant="destructive" onClick={handleDelete}>
-                        Delete
+                        {t('users.delete_dialog.confirm')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

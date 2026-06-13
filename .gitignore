@@ -51,3 +51,6 @@ CLAUDE.md
 AGENTS.md
 boost.json
 resources/js/types/typescript-transformer-manifest.json
+
+# laravel-react-i18n compiles PHP lang files into these
+/lang/php_*.json

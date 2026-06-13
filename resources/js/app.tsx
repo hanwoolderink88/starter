@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { configureEcho } from '@laravel/echo-react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { LaravelReactI18nProvider } from 'laravel-react-i18n';
 import '../css/app.css';
 import { Toaster } from './components/ui/sonner';
 import { initializeTheme } from './hooks/use-appearance';
@@ -48,11 +49,17 @@ createInertiaApp({
             : (queryClient ??= makeQueryClient());
 
         return (
-            <QueryClientProvider client={client}>
-                {app}
-                <Toaster />
-                <ReactQueryDevtools initialIsOpen={false} />
-            </QueryClientProvider>
+            <LaravelReactI18nProvider
+                locale="en"
+                fallbackLocale="en"
+                files={import.meta.glob('/lang/*.json', { eager: true })}
+            >
+                <QueryClientProvider client={client}>
+                    {app}
+                    <Toaster />
+                    <ReactQueryDevtools initialIsOpen={false} />
+                </QueryClientProvider>
+            </LaravelReactI18nProvider>
         );
     },
     progress: {

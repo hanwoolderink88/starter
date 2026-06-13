@@ -11,6 +11,7 @@ use App\Features\UserManagement\Controllers\ImpersonateController;
 use App\Features\UserManagement\Controllers\IndexUsersController;
 use App\Features\UserManagement\Controllers\ResendInvitationController;
 use App\Features\UserManagement\Controllers\ShowAcceptInvitationController;
+use App\Features\UserManagement\Controllers\ShowUserController;
 use App\Features\UserManagement\Controllers\StoreAcceptInvitationController;
 use App\Features\UserManagement\Controllers\StoreUserController;
 use App\Features\UserManagement\Controllers\UpdateUserController;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('users', IndexUsersController::class)->name('users.index');
     Route::get('users/create', CreateUserController::class)->name('users.create');
+    Route::get('users/{user}', ShowUserController::class)->name('users.show');
     Route::post('users', StoreUserController::class)->name('users.store');
     Route::get('users/{user}/edit', EditUserController::class)->name('users.edit');
     Route::put('users/{user}', UpdateUserController::class)->name('users.update');
