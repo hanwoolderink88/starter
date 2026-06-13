@@ -16,7 +16,7 @@ class DeleteUserAction
         private readonly UserManagementService $userManagementService,
     ) {}
 
-    public function handle(User $user, User $actor): void
+    public function handle(User $user, User $actor, ?string $origin = null): void
     {
         $id = $user->id;
         $label = $user->name;
@@ -29,6 +29,7 @@ class DeleteUserAction
             label: $label,
             actorId: $actor->id,
             actorName: $actor->name,
+            origin: $origin,
         ));
     }
 }

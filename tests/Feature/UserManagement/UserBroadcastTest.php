@@ -28,6 +28,40 @@ test('creating a user broadcasts UserChanged with the actor', function () {
     );
 });
 
+test('a web request threads its X-Client-Id header into the broadcast origin', function () {
+    Event::fake([UserChanged::class]);
+    $admin = createAdmin();
+
+    $this->actingAs($admin)
+        ->withHeader('X-Client-Id', 'tab-abc')
+        ->post(route('users.store'), [
+            'name' => 'New User',
+            'email' => 'newuser@example.com',
+            'role' => Role::User->value,
+        ]);
+
+    Event::assertDispatched(
+        UserChanged::class,
+        fn (UserChanged $event) => $event->payload->origin === 'tab-abc',
+    );
+});
+
+test('a request with no client id broadcasts a null origin so every browser updates', function () {
+    Event::fake([UserChanged::class]);
+    $admin = createAdmin();
+
+    $this->actingAs($admin)->post(route('users.store'), [
+        'name' => 'Headless User',
+        'email' => 'headless@example.com',
+        'role' => Role::User->value,
+    ]);
+
+    Event::assertDispatched(
+        UserChanged::class,
+        fn (UserChanged $event) => $event->payload->origin === null,
+    );
+});
+
 test('updating a user broadcasts UserChanged for that user', function () {
     Event::fake([UserChanged::class]);
     $admin = createAdmin();
@@ -83,5 +117,6 @@ test('UserChanged broadcasts a thin signal on both channels', function () {
         'label' => 'Jane Doe',
         'actorId' => 1,
         'actorName' => 'Admin',
+        'origin' => null,
     ]);
 });

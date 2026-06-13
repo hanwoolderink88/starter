@@ -17,7 +17,7 @@ class UpdateUserAction
         private readonly UserManagementService $userManagementService,
     ) {}
 
-    public function handle(User $user, string $name, string $email, Role $role, User $actor): User
+    public function handle(User $user, string $name, string $email, Role $role, User $actor, ?string $origin = null): User
     {
         $user = $this->userManagementService->update($user, $name, $email, $role);
 
@@ -27,6 +27,7 @@ class UpdateUserAction
             label: $user->name,
             actorId: $actor->id,
             actorName: $actor->name,
+            origin: $origin,
         ));
 
         return $user;

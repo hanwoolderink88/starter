@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, http } from '@inertiajs/react';
 import { configureEcho } from '@laravel/echo-react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -6,11 +6,23 @@ import { LaravelReactI18nProvider } from 'laravel-react-i18n';
 import '../css/app.css';
 import { Toaster } from './components/ui/sonner';
 import { initializeTheme } from './hooks/use-appearance';
+import { getClientId } from './lib/client-id';
 import { makeQueryClient } from './lib/query-client';
 
 configureEcho({
     broadcaster: 'reverb',
 });
+
+// Tag every request with this tab's client id so co-working broadcasts can echo
+// it back and the originating tab can suppress its own update. See
+// `use-realtime-resource` and `ResourceChangedData::$origin`.
+if (!import.meta.env.SSR) {
+    http.onRequest((config) => {
+        config.headers = { ...config.headers, 'X-Client-Id': getClientId() };
+
+        return config;
+    });
+}
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

@@ -18,7 +18,7 @@ class CreateUserAction
         private readonly UserManagementService $userManagementService,
     ) {}
 
-    public function handle(string $name, string $email, Role $role, User $actor): User
+    public function handle(string $name, string $email, Role $role, User $actor, ?string $origin = null): User
     {
         $user = $this->userManagementService->store($name, $email, $role);
 
@@ -30,6 +30,7 @@ class CreateUserAction
             label: $user->name,
             actorId: $actor->id,
             actorName: $actor->name,
+            origin: $origin,
         ));
 
         return $user;
