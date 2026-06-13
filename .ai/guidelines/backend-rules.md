@@ -48,6 +48,7 @@ Actions are domain-level classes that orchestrate complex workflows by combining
 - Use `handle()` method parameters to pass runtime data.
 - `handle()` may return a value and may have side effects.
 - No cross-feature mutation without going through an Action.
+- Broadcasting domain events for co-working updates is an Action side effect — dispatch them here, never from a Service. See the Real-Time & Co-Working rules.
 
 ```php
 class CreateUserAction
