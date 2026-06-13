@@ -95,6 +95,7 @@ export type ResourceChangedData = {
     label: string;
     actorId: number;
     actorName: string;
+    origin: string | null;
 };
 export enum Role {
     User = 'user',

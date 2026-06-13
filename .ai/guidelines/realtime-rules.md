@@ -29,7 +29,7 @@ Real-time scaffolding is true infrastructure, not feature business logic, and li
 - `ResourceAction` enum — `Created`, `Updated`, `Deleted` (TitleCase keys).
 - `ResourceChangedData` — the single, generic `#[TypeScript]` signal payload reused by every feature.
 
-The payload is deliberately thin: enough to phrase a toast, decide what to reload, and suppress the actor's own echo. It MUST NOT carry record fields (no email, role, timestamps, etc.).
+The payload is deliberately thin: enough to phrase a toast, decide what to reload, and suppress the originating surface's own echo. It MUST NOT carry record fields (no email, role, timestamps, etc.).
 
 ```php
 // app/Broadcasting/Data/ResourceChangedData.php
@@ -40,8 +40,9 @@ class ResourceChangedData extends Data
         public ResourceAction $action,
         public int $id,          // affected record id
         public string $label,    // human label for the toast, e.g. the user's name
-        public int $actorId,     // who did it — used to suppress the actor's own toast/reload
+        public int $actorId,     // who did it — used for the toast label
         public string $actorName,
+        public ?string $origin = null, // the initiating surface's client id — used to suppress its own echo; null for non-web surfaces (e.g. MCP)
     ) {}
 }
 ```
@@ -82,12 +83,14 @@ class UserChanged implements ShouldBroadcastNow
 
 ## Dispatching
 
-Broadcasting is a **side effect**, so it belongs in the **Action**, never the Service (Services persist only — see the backend rules). Dispatch after the Service has persisted, and pass the acting user in as a parameter rather than reading global state.
+Broadcasting is a **side effect**, so it belongs in the **Action**, never the Service (Services persist only — see the backend rules). Dispatch after the Service has persisted, and pass the acting user — and the originating surface's `$origin` — in as parameters rather than reading global state.
 
 Dispatch with `Event::dispatch` (`{Model}Changed::dispatch(...)`), not the `broadcast()` helper: the dispatcher auto-broadcasts events implementing `ShouldBroadcast*` (so the behaviour is identical), and unlike `broadcast()` it can be asserted with `Event::fake()` in tests.
 
+The `$origin` is threaded straight through from the caller: web controllers pass `$request->header('X-Client-Id')`; non-web surfaces (MCP tools, console commands, jobs) pass nothing, leaving it `null` so every browser is notified.
+
 ```php
-public function handle(UserData $data, User $actor): User
+public function handle(UserData $data, User $actor, ?string $origin = null): User
 {
     $user = $this->userService->store($data);
 
@@ -97,6 +100,7 @@ public function handle(UserData $data, User $actor): User
         label: $user->name,
         actorId: $actor->id,
         actorName: $actor->name,
+        origin: $origin,
     ));
 
     return $user;
@@ -136,11 +140,13 @@ The strategy is a property of the consuming view, not the event:
 
 For a same-record conflict (someone saved the record you are editing), make it prominent (`toast.warning` or an inline banner) because reloading discards the user's edits.
 
-## Suppress the Actor's Own Echo
+## Suppress the Originating Surface's Own Echo
 
-The person who made the change already saw the result of their own request and must not get a toast or reload. Suppress on the client by comparing `actorId` to the current user id.
+The surface that made the change already saw the result of its own request and must not get a toast or reload. Suppress on the **origin**, not the user: each web SPA tab generates a stable client id (`lib/client-id.ts`) that an `http.onRequest` interceptor in `app.tsx` attaches as the `X-Client-Id` header on every request. Controllers echo it into `ResourceChangedData::$origin`, and the hook drops the event only when `payload.origin === clientId`.
 
-Do **not** rely on `->toOthers()`: Inertia v3 uses its own XHR client (not axios), so Echo's automatic `X-Socket-ID` header is absent and `toOthers()` will not work without extra plumbing. The `actorId` check is robust and needs none.
+Suppressing on `actorId` (the user) is wrong once the app has more than one surface: the same user acting over MCP — or in a second browser tab — shares the actor id, so an `actorId` check would silence a browser that never saw the change. Keying on the originating client id keeps the initiating tab quiet while every other tab and surface (MCP carries a `null` origin) updates.
+
+Do **not** rely on `->toOthers()`: Inertia v3 uses its own XHR client (not axios), so Echo's automatic `X-Socket-ID` header is absent and `toOthers()` will not work without extra plumbing. The `X-Client-Id` header is our own equivalent and is robust across surfaces.
 
 ## Frontend Hook
 
@@ -152,9 +158,10 @@ useRealtimeResource({
     event: '.UserChanged',
     only: ['users'],          // Inertia partial-reload keys for THIS page
     mode: 'auto',             // 'auto' | 'ask'
-    currentUserId,
 });
 ```
+
+Origin self-suppression is handled inside the hook via the shared client id — pages pass nothing for it.
 
 The payload type is the generated `App.Broadcasting.Data.ResourceChangedData` — never hand-write it.
 
@@ -168,4 +175,4 @@ For genuine co-editing awareness, layer `useEchoPresence` on the per-record chan
 2. The create/update/delete **Actions** dispatch it with a `ResourceChangedData` signal.
 3. Channel authorization added to `routes/channels.php` against the matching policy.
 4. Subscribing pages call `useRealtimeResource` with their own `only` keys and the right `mode`.
-5. Actor self-suppression verified (no self-toast on the initiating client).
+5. Origin self-suppression verified: the initiating tab gets no self-toast, while the actor's *other* tabs and non-web surfaces (MCP) do update.

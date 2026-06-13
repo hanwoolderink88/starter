@@ -1,6 +1,7 @@
-import { router, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
 import { toast } from 'sonner';
+import { getClientId } from '@/lib/client-id';
 import { ResourceAction, type ResourceChangedData } from '@/types/generated';
 
 interface RealtimeResourceOptions {
@@ -34,9 +35,9 @@ const ACTION_VERB: Record<ResourceAction, string> = {
 };
 
 /**
- * Subscribe a page to a resource's co-working broadcasts: suppress the actor's
- * own echo, toast the change, and refresh data through an Inertia partial
- * reload. See the Real-Time & Co-Working rules.
+ * Subscribe a page to a resource's co-working broadcasts: suppress the
+ * originating tab's own echo, toast the change, and refresh data through an
+ * Inertia partial reload. See the Real-Time & Co-Working rules.
  */
 export function useRealtimeResource({
     channel,
@@ -47,14 +48,15 @@ export function useRealtimeResource({
     invalidateTags,
     onChange,
 }: RealtimeResourceOptions): void {
-    const currentUserId = usePage().props.auth.user?.id;
+    const clientId = getClientId();
 
     useEcho<ResourceChangedData>(
         channel,
         event,
         (payload) => {
-            // The actor already saw the result of their own request.
-            if (payload.actorId === currentUserId) {
+            // The tab that initiated the change already has the fresh result;
+            // other tabs and surfaces (e.g. MCP) carry no/other origin and update.
+            if (payload.origin === clientId) {
                 return;
             }
 

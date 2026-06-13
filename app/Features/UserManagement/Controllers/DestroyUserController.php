@@ -29,7 +29,7 @@ class DestroyUserController extends Controller
 
         Gate::authorize('delete', $user);
 
-        $this->deleteUserAction->handle($user, $actor);
+        $this->deleteUserAction->handle($user, $actor, $request->header('X-Client-Id'));
 
         return redirect()->route('users.index');
     }

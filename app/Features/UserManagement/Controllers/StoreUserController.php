@@ -30,6 +30,7 @@ class StoreUserController extends Controller
             $request->validated('email'),
             Role::from($request->validated('role')),
             $actor,
+            $request->header('X-Client-Id'),
         );
 
         return redirect()->route('users.index');
