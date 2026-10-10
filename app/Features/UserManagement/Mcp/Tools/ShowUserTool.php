@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Features\UserManagement\Mcp\Tools;
 
+use App\Features\Roles\Enums\Permission;
 use App\Features\UserManagement\Data\UserManagementData;
-use App\Features\UserManagement\Enums\Permission;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
@@ -15,9 +15,11 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 use Override;
 
 #[Name('user_detail')]
+#[IsReadOnly]
 #[Description('Retrieve detailed information about a single user by their ID.')]
 class ShowUserTool extends Tool
 {

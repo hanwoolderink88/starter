@@ -8,4 +8,4 @@ use Laravel\Mcp\Facades\Mcp;
 Mcp::oauthRoutes();
 
 Mcp::web('/mcp', AppServer::class)
-    ->middleware('auth:api');
+    ->middleware(['auth:api', 'throttle:mcp']);

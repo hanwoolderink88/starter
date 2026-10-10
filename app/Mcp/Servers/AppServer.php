@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Mcp\Servers;
 
+use App\Features\Activity\Mcp\Servers\ActivityServer;
+use App\Features\Roles\Mcp\Servers\RolesServer;
 use App\Features\UserManagement\Mcp\Servers\UserManagementServer;
 use Laravel\Mcp\Server;
 use Override;
@@ -31,12 +33,17 @@ class AppServer extends Server
         $this->instructions = sprintf(
             'Administrative tools for the %s application. The tools you can see are the '
             .'ones the authenticated account is permitted to use. When creating a record, '
-            .'first search to avoid creating a duplicate.',
+            .'first search to avoid creating a duplicate. Updates need the record\'s current '
+            .'version; when one is refused because someone else saved first, fetch the record '
+            .'again and retry. Everything you do is logged with you as the actor and source mcp; '
+            .'use search_activity to find out who did what.',
             $appName,
         );
 
         $this->tools = [
             ...UserManagementServer::TOOLS,
+            ...RolesServer::TOOLS,
+            ...ActivityServer::TOOLS,
         ];
     }
 }

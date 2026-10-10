@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // Tool calls one account may make per minute on /mcp.
+    'mcp' => [
+        'per_minute' => (int) env('MCP_RATE_LIMIT_PER_MINUTE', 120),
+    ],
+
 ];
