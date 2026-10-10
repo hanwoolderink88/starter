@@ -17,15 +17,18 @@ class UserSeeder extends Seeder
         $administrator = Role::query()->where('is_protected', true)->sole();
         $user = Role::query()->where('name', SeedDefaultRolesAction::USER_NAME)->sole();
 
+        // Every seeded account logs in with password "1".
+        $password = Hash::make('1');
+
         foreach (['admin@test.com' => 'Test Admin', 'admin2@test.com' => 'Test Admin 2'] as $email => $name) {
             User::factory()->create([
                 'name' => $name,
                 'email' => $email,
-                'password' => Hash::make('1'),
+                'password' => $password,
             ])->assignRole($administrator);
         }
 
-        User::factory(10)->create()->each(function (User $model) use ($user): void {
+        User::factory(10)->create(['password' => $password])->each(function (User $model) use ($user): void {
             $model->assignRole($user);
         });
     }
