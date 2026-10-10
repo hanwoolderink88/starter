@@ -28,28 +28,39 @@ yarn-error.log
 /.vscode
 /.zed
 
-# AI tools (generated/local state)
+# AI clients: generated per developer by `php artisan boost:install` and
+# `boost:update`. Boost's sources (.ai/guidelines, .ai/skills, .ai/rules)
+# are committed; everything it generates from them is not.
 /.ai/plans
+/boost.json
+/.mcp.json
+/CLAUDE.md
+/AGENTS.md
+/GEMINI.md
+/opencode.json
+/opencode.jsonc
 /.agents
-/.cursor
-/.opencode
-/.windsurf
-/.cline
-/.roo
-/.augment
-/.continue
-/.aider*
-/.copilot
+/.amp
 /.claude
+/.codex
+/.cursor
+/.factory
+/.grok
+/.junie
+/.kiro
+/.opencode
+/.pi
+/.github/copilot-instructions.md
+/.github/skills
+/.aider*
+/.augment
+/.cline
+/.continue
+/.copilot
+/.roo
 /.sisyphus
-/s
+/.windsurf
 
-opencode.json
-
-.mcp.json
-CLAUDE.md
-AGENTS.md
-boost.json
 resources/js/types/typescript-transformer-manifest.json
 
 # laravel-react-i18n compiles PHP lang files into these
