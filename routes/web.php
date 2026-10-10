@@ -55,7 +55,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('logout', LogoutController::class)->name('logout');
     Route::post('impersonation/stop', StopImpersonatingController::class)->name('impersonation.stop');
 
-    Route::redirect('settings', '/settings/profile');
+    // A GET route rather than Route::redirect(), which also registers the
+    // QUERY method that Wayfinder's generated TypeScript does not know yet.
+    Route::get('settings', fn () => redirect()->route('profile.edit'));
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
