@@ -1,6 +1,7 @@
 <?php
 
 use App\Features\Activity\Commands\PruneActivityCommand;
+use App\Features\Collaboration\Commands\CloseExpiredFieldSessionsCommand;
 use App\Features\Roles\Commands\SyncPermissionsCommand;
 use App\Features\UserManagement\Commands\AnonymizeDeletedUsersCommand;
 use App\Http\Middleware\HandleAppearance;
@@ -29,11 +30,17 @@ return Application::configure(basePath: dirname(__DIR__))
         SyncPermissionsCommand::class,
         AnonymizeDeletedUsersCommand::class,
         PruneActivityCommand::class,
+        CloseExpiredFieldSessionsCommand::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->append(SecurityHeaders::class);
+
+        // A collaborative field is saved while it is typed: a trailing space
+        // or an emptied field must reach the server as typed.
+        $middleware->trimStrings(except: [fn (Request $request): bool => $request->is('collaboration/*')]);
+        $middleware->convertEmptyStringsToNull(except: [fn (Request $request): bool => $request->is('collaboration/*')]);
 
         $middleware->web(append: [
             AuthenticateSession::class,

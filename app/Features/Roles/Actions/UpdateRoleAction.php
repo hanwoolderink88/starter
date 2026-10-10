@@ -24,25 +24,26 @@ class UpdateRoleAction
     ) {}
 
     /**
-     * The name, description and permissions are logged with their old and
-     * new value. The protected administrator role always keeps every
-     * permission, whatever is asked: only its name and description change.
+     * The permissions are logged with their old and new value. The name and
+     * description are collaborative fields with their own sessions. The
+     * protected administrator role always keeps every permission, whatever
+     * is asked.
      *
      * @param  int  $version  the version the change is based on
      * @param  list<Permission>  $permissions
      *
      * @throws StaleVersionException when someone saved the role in the meantime
      */
-    public function handle(Role $role, int $version, string $name, ?string $description, array $permissions, ChangeContext $context): Role
+    public function handle(Role $role, int $version, array $permissions, ChangeContext $context): Role
     {
         if ($role->is_protected) {
             $permissions = Permission::cases();
         }
 
-        $role = DB::transaction(function () use ($role, $version, $name, $description, $permissions, $context): Role {
+        $role = DB::transaction(function () use ($role, $version, $permissions, $context): Role {
             $before = $this->loggedFields($role);
 
-            $role = $this->roleService->update($role, $version, $name, $description, $permissions);
+            $role = $this->roleService->updatePermissions($role, $version, $permissions);
 
             $changes = ActivityRecorder::diff($before, $this->loggedFields($role));
 
@@ -59,13 +60,11 @@ class UpdateRoleAction
     }
 
     /**
-     * @return array{name: string, description: string|null, permissions: list<string>}
+     * @return array{permissions: list<string>}
      */
     private function loggedFields(Role $role): array
     {
         return [
-            'name' => $role->name,
-            'description' => $role->description,
             'permissions' => $this->roleService->permissionNames($role),
         ];
     }

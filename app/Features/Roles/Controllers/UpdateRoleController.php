@@ -26,8 +26,6 @@ class UpdateRoleController extends Controller
         $role = $this->updateRoleAction->handle(
             $role,
             $request->integer('version'),
-            $request->validated('name'),
-            $request->validated('description'),
             $request->permissions(),
             ChangeContext::fromRequest($request),
         );

@@ -2,6 +2,9 @@
 
 use App\Features\Activity\Controllers\IndexActivityController;
 use App\Features\Auth\Data\WelcomePageData;
+use App\Features\Collaboration\Controllers\FieldLockController;
+use App\Features\Collaboration\Controllers\FieldRevisionController;
+use App\Features\Collaboration\Controllers\FieldValueController;
 use App\Features\Roles\Controllers\CreateRoleController;
 use App\Features\Roles\Controllers\DestroyRoleController;
 use App\Features\Roles\Controllers\EditRoleController;
@@ -88,4 +91,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('roles/{role}', DestroyRoleController::class)->name('roles.destroy');
 
     Route::get('activity', IndexActivityController::class)->name('activity.index');
+
+    // Editing fields together (app/Infrastructure/Collaboration).
+    Route::prefix('collaboration/{type}/{id}/{field}')->whereNumber('id')->name('collaboration.')->group(function () {
+        Route::post('lock', [FieldLockController::class, 'store'])->name('lock.store');
+        Route::put('lock', [FieldLockController::class, 'update'])->name('lock.update');
+        Route::delete('lock', [FieldLockController::class, 'destroy'])->name('lock.destroy');
+        Route::put('/', FieldValueController::class)->name('value.update');
+        Route::get('revisions', [FieldRevisionController::class, 'index'])->name('revisions.index');
+        Route::get('revisions/{number}', [FieldRevisionController::class, 'show'])->whereNumber('number')->name('revisions.show');
+        Route::post('revisions/{number}/restore', [FieldRevisionController::class, 'restore'])->whereNumber('number')->name('revisions.restore');
+    });
 });

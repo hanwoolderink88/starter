@@ -15,6 +15,7 @@ export default function EditRole({
     rolePermissions,
     activity,
     holders,
+    fields,
 }: PageProps<RoleFormPageData>) {
     const { t } = useLaravelReactI18n();
 
@@ -34,6 +35,7 @@ export default function EditRole({
                     role={role}
                     permissionGroups={permissionGroups}
                     permissions={rolePermissions}
+                    fields={fields}
                     actions={<RoleActions role={role} holders={holders} />}
                     header={
                         <div className="min-w-0 space-y-1.5">

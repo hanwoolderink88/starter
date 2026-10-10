@@ -104,6 +104,21 @@ class ChangeContext extends Data
     }
 
     /**
+     * A change made on behalf of a given user, outside that user's own
+     * request: closing someone's expired editing session names its holder,
+     * with the source and impersonator of that session, not whoever caused
+     * the closing. No browser request, so no network details.
+     */
+    public static function forActor(User $actor, ActivitySource $source, ?User $impersonator = null): self
+    {
+        return new self(
+            actor: $actor,
+            source: $source,
+            impersonator: $impersonator,
+        );
+    }
+
+    /**
      * A change made by the application itself: a seeder, a command or a job.
      */
     public static function system(): self

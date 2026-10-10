@@ -127,20 +127,16 @@ class RoleService
     }
 
     /**
-     * Save the name and description at the expected version and replace the
-     * permissions. The permission cache is cleared, so the change applies at
-     * once.
+     * Replace the permissions at the expected version. The permission cache
+     * is cleared, so the change applies at once.
      *
      * @param  list<Permission>  $permissions
      *
      * @throws StaleVersionException when the role changed since `$expectedVersion`
      */
-    public function update(Role $role, int $expectedVersion, string $name, ?string $description, array $permissions): Role
+    public function updatePermissions(Role $role, int $expectedVersion, array $permissions): Role
     {
-        $role->updateAtVersion($expectedVersion, [
-            'name' => $name,
-            'description' => $description,
-        ]);
+        $role->updateAtVersion($expectedVersion);
 
         $role->syncPermissions($permissions);
 

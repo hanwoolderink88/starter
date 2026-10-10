@@ -19,7 +19,6 @@ trait HasPermissionFields
     protected function permissionRules(): array
     {
         return [
-            'description' => ['nullable', 'string', 'max:1000'],
             'permissions' => ['sometimes', 'array'],
             'permissions.*' => ['distinct', Rule::enum(Permission::class)],
         ];

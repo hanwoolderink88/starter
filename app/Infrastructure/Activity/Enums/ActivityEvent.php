@@ -18,6 +18,7 @@ enum ActivityEvent: string
     case Deleted = 'deleted';
     case Restored = 'restored';
     case Anonymized = 'anonymized';
+    case RevisionRestored = 'revision_restored';
     case StatusChanged = 'status_changed';
     case RolesChanged = 'roles_changed';
 

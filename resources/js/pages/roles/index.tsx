@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import Heading from '@/components/heading';
 import RolesTable from '@/components/roles/roles-table';
 import { Button } from '@/components/ui/button';
+import { useCollaborativeFieldSignals } from '@/hooks/use-collaborative-field-signals';
 import { useRealtimeResource } from '@/hooks/use-realtime-resource';
 import AppLayout from '@/layouts/app-layout';
 import { create, index } from '@/routes/roles';
@@ -31,6 +32,13 @@ export default function RolesIndex({
         invalidateTags: (event) => [`role.${event.id}`],
         describe: (event, actor) =>
             t(`roles.realtime.${event.action}`, { name: event.label, actor }),
+    });
+
+    // A name or description saved as it is typed: no toast, just show it.
+    useCollaborativeFieldSignals({
+        channel: 'roles',
+        only: ['roles'],
+        invalidateTags: (payload) => [`role.${payload.id}`],
     });
 
     const summary = [

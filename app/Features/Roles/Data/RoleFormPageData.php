@@ -6,6 +6,7 @@ namespace App\Features\Roles\Data;
 
 use App\Features\Roles\Enums\Permission;
 use App\Infrastructure\Activity\Data\ActivityData;
+use App\Infrastructure\Collaboration\Data\CollaborativeFieldData;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -22,6 +23,7 @@ class RoleFormPageData extends Data
      * @param  list<PermissionGroupData>  $permissionGroups  the whole catalogue
      * @param  list<Permission>  $rolePermissions  the role's permissions; [] when creating. Not `permissions`: that is the viewer's own, shared with every page
      * @param  list<ActivityData>|null  $activity  the role's timeline, newest first; null when creating or when the viewer may not read the activity log
+     * @param  array<string, CollaborativeFieldData>|null  $fields  the name and description, edited together; null when creating
      * @param  list<RoleHolderData>  $holders  the first users who have the role, for the dialog that blocks deleting it; `role.userCount` has the total
      */
     public function __construct(
@@ -30,5 +32,6 @@ class RoleFormPageData extends Data
         public array $rolePermissions,
         public ?array $activity = null,
         public array $holders = [],
+        public ?array $fields = null,
     ) {}
 }

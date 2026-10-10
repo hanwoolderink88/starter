@@ -19,6 +19,7 @@ return [
         'deleted' => 'Verwijderd',
         'restored' => 'Hersteld',
         'anonymized' => 'Geanonimiseerd',
+        'revision_restored' => 'Eerdere versie teruggezet',
         'status_changed' => 'Status gewijzigd',
         'roles_changed' => 'Rollen gewijzigd',
         'invitation_resent' => 'Uitnodiging opnieuw verstuurd',

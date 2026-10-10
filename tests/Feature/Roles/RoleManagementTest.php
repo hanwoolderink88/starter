@@ -67,15 +67,16 @@ test('role names are unique and permissions must exist', function () {
 test('updating a role replaces its permissions and logs what changed', function () {
     $role = Role::factory()->withPermissions([Permission::ViewUsers])->create(['name' => 'Support']);
 
+    // Name and description save per field (collaboration); Save ignores them.
     $this->actingAs(createAdmin())->put(route('roles.update', $role), ['version' => $role->fresh()->version,
         'name' => 'Helpdesk',
-        'description' => $role->description,
         'permissions' => [Permission::ViewActivity->value],
     ])->assertRedirect(route('roles.index'));
 
-    expect($role->fresh()->permissions->pluck('name')->all())->toBe(['view activity'])
+    expect($role->fresh())
+        ->name->toBe('Support')
+        ->and($role->fresh()->permissions->pluck('name')->all())->toBe(['view activity'])
         ->and(Activity::query()->forSubject($role)->sole()->changes)->toBe([
-            'name' => ['old' => 'Support', 'new' => 'Helpdesk'],
             'permissions' => ['old' => ['view users'], 'new' => ['view activity']],
         ]);
 });
@@ -84,13 +85,10 @@ test('the administrator role always keeps every permission', function () {
     $administrator = administratorRole();
 
     $this->actingAs(createAdmin())->put(route('roles.update', $administrator), ['version' => $administrator->fresh()->version,
-        'name' => 'Beheerder',
         'permissions' => [],
     ])->assertRedirect(route('roles.index'));
 
-    expect($administrator->fresh())
-        ->name->toBe('Beheerder')
-        ->and($administrator->fresh()->permissions)->toHaveCount(count(Permission::cases()));
+    expect($administrator->fresh()->permissions)->toHaveCount(count(Permission::cases()));
 });
 
 test('the administrator role can be neither deactivated nor deleted', function () {

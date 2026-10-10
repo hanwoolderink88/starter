@@ -3,6 +3,7 @@ import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Lock } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import CollaborativeField from '@/components/collaboration/collaborative-field';
 import ConflictBanner from '@/components/conflict-banner';
 import InputError from '@/components/input-error';
 import PermissionMatrix from '@/components/roles/permission-matrix';
@@ -10,10 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useCollaborativeFieldSignals } from '@/hooks/use-collaborative-field-signals';
 import { useRealtimeResource } from '@/hooks/use-realtime-resource';
 import { index, store, update } from '@/routes/roles';
 import {
     ResourceAction,
+    type CollaborativeFieldData,
     type Permission,
     type PermissionGroupData,
     type RoleData,
@@ -40,21 +44,28 @@ type Props = {
     role: RoleData | null;
     permissionGroups: PermissionGroupData[];
     permissions: Permission[];
+    /** On the edit page: name and description, saved as they are typed. */
+    fields?: Record<string, CollaborativeFieldData> | null;
     /** Rendered above the fields, such as the page title. */
     header: React.ReactNode;
     /** Buttons next to Save on the edit page, such as Deactivate and Delete. */
     actions?: React.ReactNode;
 };
 
+/** The props that show a role's name and description. */
+const FIELD_PROPS = ['fields', 'role', 'activity'];
+
 /**
- * Create or edit a role: name, description and the permission matrix. The
- * protected administrator role keeps every permission, so its matrix is
- * read-only.
+ * Create or edit a role: name, description and the permission matrix. When
+ * editing, name and description save as they are typed, one editor at a
+ * time; Save stores the permissions. The protected administrator role keeps
+ * every permission, so its matrix is read-only.
  */
 export default function RoleForm({
     role,
     permissionGroups,
     permissions,
+    fields,
     header,
     actions,
 }: Props) {
@@ -117,6 +128,7 @@ export default function RoleForm({
             return;
         }
 
+        transform(({ permissions, version }) => ({ permissions, version }));
         put(update(role.id).url, { invalidateCacheTags: [`role.${role.id}`] });
     }
 
@@ -127,6 +139,7 @@ export default function RoleForm({
     return (
         <form onSubmit={submit} className="space-y-6">
             {role && <LiveRoleUpdates role={role} />}
+            {role && <LiveFieldUpdates role={role} />}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 {header}
@@ -141,11 +154,7 @@ export default function RoleForm({
             {errors.version && (
                 <ConflictBanner
                     message={errors.version}
-                    copyText={[
-                        `${t('roles.form.name')}: ${data.name}`,
-                        `${t('roles.form.description')}: ${data.description}`,
-                        `${t('roles.form.permissions')}: ${data.permissions.join(', ')}`,
-                    ].join('\n')}
+                    copyText={`${t('roles.form.permissions')}: ${data.permissions.join(', ')}`}
                     onReload={reloadAfterConflict}
                 />
             )}
@@ -164,33 +173,61 @@ export default function RoleForm({
                 </div>
             )}
 
-            <Card className="grid gap-4 p-5 sm:grid-cols-[1fr_1.5fr]">
-                <div className="grid content-start gap-2">
-                    <Label htmlFor="name">{t('roles.form.name')}</Label>
-                    <Input
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                        placeholder={t('roles.form.name_placeholder')}
-                    />
-                    <InputError message={errors.name} />
-                </div>
-                <div className="grid content-start gap-2">
-                    <Label htmlFor="description">
-                        {t('roles.form.description')}
-                    </Label>
-                    <Input
-                        id="description"
-                        name="description"
-                        value={data.description}
-                        onChange={(e) => setData('description', e.target.value)}
-                        placeholder={t('roles.form.description_placeholder')}
-                    />
-                    <InputError message={errors.description} />
-                </div>
-            </Card>
+            {fields ? (
+                <Card className="grid gap-4 p-5 sm:grid-cols-[1fr_1.5fr]">
+                    {fields.name && (
+                        <CollaborativeField
+                            field={fields.name}
+                            label={t('roles.form.name')}
+                            placeholder={t('roles.form.name_placeholder')}
+                            reloadOnly={FIELD_PROPS}
+                        />
+                    )}
+                    {fields.description && (
+                        <CollaborativeField
+                            field={fields.description}
+                            label={t('roles.form.description')}
+                            placeholder={t(
+                                'roles.form.description_placeholder',
+                            )}
+                            reloadOnly={FIELD_PROPS}
+                        />
+                    )}
+                </Card>
+            ) : (
+                <Card className="grid gap-4 p-5 sm:grid-cols-[1fr_1.5fr]">
+                    <div className="grid content-start gap-2">
+                        <Label htmlFor="name">{t('roles.form.name')}</Label>
+                        <Input
+                            id="name"
+                            name="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                            placeholder={t('roles.form.name_placeholder')}
+                        />
+                        <InputError message={errors.name} />
+                    </div>
+                    <div className="grid content-start gap-2">
+                        <Label htmlFor="description">
+                            {t('roles.form.description')}
+                        </Label>
+                        <Textarea
+                            rows={4}
+                            id="description"
+                            name="description"
+                            value={data.description}
+                            onChange={(e) =>
+                                setData('description', e.target.value)
+                            }
+                            placeholder={t(
+                                'roles.form.description_placeholder',
+                            )}
+                        />
+                        <InputError message={errors.description} />
+                    </div>
+                </Card>
+            )}
 
             <section className="space-y-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -242,6 +279,16 @@ function LiveRoleUpdates({ role }: { role: RoleData }) {
                 return true;
             }
         },
+    });
+
+    return null;
+}
+
+/** Someone saved a name or description: show it. */
+function LiveFieldUpdates({ role }: { role: RoleData }) {
+    useCollaborativeFieldSignals({
+        channel: `role.${role.id}`,
+        only: FIELD_PROPS,
     });
 
     return null;

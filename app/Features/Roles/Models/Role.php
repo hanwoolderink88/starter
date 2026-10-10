@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Features\Roles\Models;
 
 use App\Infrastructure\Activity\Concerns\HasVersion;
+use App\Infrastructure\Collaboration\Contracts\CollaborativeModel;
+use App\Infrastructure\Collaboration\Data\CollaborativeField;
 use Database\Factories\RoleFactory;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -12,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Validation\Rule;
 use Override;
 use Spatie\Permission\Models\Role as SpatieRole;
 
@@ -34,7 +37,7 @@ use Spatie\Permission\Models\Role as SpatieRole;
  * @property int $version
  */
 #[UseFactory(RoleFactory::class)]
-class Role extends SpatieRole
+class Role extends SpatieRole implements CollaborativeModel
 {
     /** @use HasFactory<RoleFactory> */
     use HasFactory;
@@ -70,6 +73,33 @@ class Role extends SpatieRole
         static::addGlobalScope(self::ACTIVE_SCOPE, function (Builder $query): void {
             $query->where($query->qualifyColumn('is_active'), true);
         });
+    }
+
+    /**
+     * Administrators edit a role's name and description together; its
+     * permissions go through the role form.
+     *
+     * @return array<string, CollaborativeField>
+     */
+    public function collaborativeFields(): array
+    {
+        return [
+            'name' => new CollaborativeField([
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('roles', 'name')->where('guard_name', 'web')->ignore($this->id),
+            ], label: 'roles.form.name'),
+            'description' => new CollaborativeField(['nullable', 'string', 'max:1000'], label: 'roles.form.description', multiline: true),
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function collaborationChannels(): array
+    {
+        return ['role.'.$this->id, 'roles'];
     }
 
     /**

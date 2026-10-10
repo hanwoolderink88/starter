@@ -6,6 +6,7 @@ namespace App\Infrastructure\Activity\Services;
 
 use App\Infrastructure\Activity\Enums\ActivityEvent;
 use App\Infrastructure\Activity\Models\Activity;
+use App\Infrastructure\Collaboration\Models\FieldRevision;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,10 @@ class ActivityPrivacy
                 'ip_address' => null,
                 'user_agent' => null,
             ]);
+
+            // The authors of field revisions are kept as a name snapshot too.
+            FieldRevision::query()->where('author_id', $userId)->update(['author_name' => $label]);
+            FieldRevision::query()->where('impersonator_id', $userId)->update(['impersonator_name' => $label]);
 
             $changed += Activity::query()->where('impersonator_id', $userId)->update([
                 'impersonator_name' => $label,

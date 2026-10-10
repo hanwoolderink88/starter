@@ -19,6 +19,7 @@ return [
         'deleted' => 'Deleted',
         'restored' => 'Restored',
         'anonymized' => 'Anonymized',
+        'revision_restored' => 'Earlier version restored',
         'status_changed' => 'Status changed',
         'roles_changed' => 'Roles changed',
         'invitation_resent' => 'Invitation resent',

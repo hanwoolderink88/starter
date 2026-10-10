@@ -24,6 +24,7 @@ export enum ActivityEvent {
     Deleted = 'deleted',
     Restored = 'restored',
     Anonymized = 'anonymized',
+    RevisionRestored = 'revision_restored',
     StatusChanged = 'status_changed',
     RolesChanged = 'roles_changed',
     InvitationResent = 'invitation_resent',
@@ -79,6 +80,16 @@ export type AuthData = {
     user: UserData | null;
     impersonatorName: string | null;
 };
+export type CollaborativeFieldData = {
+    type: string;
+    id: number;
+    field: string;
+    value: string;
+    multiline: boolean;
+    canEdit: boolean;
+    lock: FieldLockData | null;
+    revisionCount: number;
+};
 export type CursorPaginatedDataCollection<TKey, TValue> = CursorPaginator<
     TKey,
     TValue
@@ -103,6 +114,46 @@ export type CursorPaginatorInterface<TKey, TValue> = CursorPaginator<
     TKey,
     TValue
 >;
+export type DiffHunkData = {
+    oldStart: number;
+    oldLines: number;
+    newStart: number;
+    newLines: number;
+    lines: DiffLineData[];
+};
+export type DiffLineData = {
+    type: DiffLineType;
+    content: string;
+    oldNumber: number | null;
+    newNumber: number | null;
+};
+export enum DiffLineType {
+    Context = 'context',
+    Removed = 'removed',
+    Added = 'added',
+}
+export type FieldLockData = {
+    userName: string;
+    impersonatorName: string | null;
+    source: ActivitySource;
+    isMine: boolean;
+    isThisTab: boolean;
+    claimedAt: string;
+};
+export type FieldRevisionData = {
+    number: number;
+    authorName: string;
+    impersonatorName: string | null;
+    source: ActivitySource;
+    restoredFromNumber: number | null;
+    createdAt: string;
+    createdAtDisplay: string;
+};
+export type FieldRevisionDetailData = {
+    revision: FieldRevisionData;
+    content: string;
+    diffToCurrent: TextDiffData;
+};
 export type ForgotPasswordPageData = {
     status: string | null;
 };
@@ -204,6 +255,7 @@ export type RoleFormPageData = {
     rolePermissions: Permission[];
     activity: ActivityData[] | null;
     holders: RoleHolderData[];
+    fields: Record<string, CollaborativeFieldData> | null;
 };
 export type RoleHolderData = {
     id: number;
@@ -245,6 +297,11 @@ export enum SortDirection {
     Asc = 'asc',
     Desc = 'desc',
 }
+export type TextDiffData = {
+    hunks: DiffHunkData[];
+    additions: number;
+    deletions: number;
+};
 export type TwoFactorPageData = {
     twoFactorEnabled: boolean;
     requiresConfirmation: boolean;
