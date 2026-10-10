@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}">
         (function() {
             const appearance = '{{ $appearance ?? "system" }}';
 
@@ -132,7 +132,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('authorizeForm');
         const button = document.getElementById('authorizeButton');
