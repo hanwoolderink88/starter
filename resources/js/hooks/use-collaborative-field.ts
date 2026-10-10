@@ -33,19 +33,10 @@ const IDLE_SECONDS = 120;
  * - `expired`: the session closed after a while without typing.
  */
 export type CollaborativeFieldPhase =
-    | 'viewing'
-    | 'claiming'
-    | 'editing'
-    | 'offline'
-    | 'conflict'
-    | 'expired';
+    'viewing' | 'claiming' | 'editing' | 'offline' | 'conflict' | 'expired';
 
 export type CollaborativeFieldSaveStatus =
-    | 'idle'
-    | 'pending'
-    | 'saving'
-    | 'saved'
-    | 'unsaved';
+    'idle' | 'pending' | 'saving' | 'saved' | 'unsaved';
 
 type HttpFailure = { response?: { status: number; data: string } };
 
