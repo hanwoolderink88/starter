@@ -18,11 +18,19 @@ class ProfileService
 
         $user->save();
 
+        // Not checked against a version (it is the user's own form), but an
+        // administrator's form opened before it must not overwrite it.
+        if ($user->wasChanged(['name', 'email'])) {
+            $user->bumpVersion();
+        }
+
         return $user;
     }
 
-    public function delete(User $user): void
+    public function updateLocale(User $user, string $locale): User
     {
-        $user->delete();
+        $user->forceFill(['locale' => $locale])->save();
+
+        return $user;
     }
 }

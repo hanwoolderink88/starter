@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Features\Settings\Controllers;
 
+use App\Features\Roles\Exceptions\LastAdministratorException;
 use App\Features\Settings\Actions\DeleteProfileAction;
 use App\Features\Settings\Data\ProfilePageData;
 use App\Features\Settings\Requests\ProfileDeleteRequest;
@@ -14,6 +15,7 @@ use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,7 +51,7 @@ class ProfileController extends Controller
             $request->validated('email'),
         );
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('settings.flash.profile_updated')]);
 
         return redirect()->route('profile.edit');
     }
@@ -62,7 +64,11 @@ class ProfileController extends Controller
         $user = $request->user();
         assert($user instanceof User);
 
-        $this->deleteProfileAction->handle($request, $user);
+        try {
+            $this->deleteProfileAction->handle($request, $user);
+        } catch (LastAdministratorException) {
+            throw ValidationException::withMessages(['password' => __('roles.last_administrator')]);
+        }
 
         return redirect('/');
     }

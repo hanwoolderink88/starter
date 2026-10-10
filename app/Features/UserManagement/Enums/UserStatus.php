@@ -11,6 +11,8 @@ enum UserStatus: string
 {
     case Active = 'active';
     case Invited = 'invited';
+    /** Deleted but not anonymized yet, so it can still be restored. */
+    case Deleted = 'deleted';
 
     /**
      * @return array<string, string>
