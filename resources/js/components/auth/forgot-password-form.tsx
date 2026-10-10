@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -15,6 +16,7 @@ type ForgotPasswordFormProps = {
 export default function ForgotPasswordForm({
     status,
 }: ForgotPasswordFormProps) {
+    const { t } = useLaravelReactI18n();
     return (
         <>
             {status && (
@@ -28,14 +30,18 @@ export default function ForgotPasswordForm({
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">
+                                    {t('auth.fields.email')}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
                                     name="email"
                                     autoComplete="off"
                                     autoFocus
-                                    placeholder="email@example.com"
+                                    placeholder={t(
+                                        'auth.fields.email_placeholder',
+                                    )}
                                 />
 
                                 <InputError message={errors.email} />
@@ -50,7 +56,7 @@ export default function ForgotPasswordForm({
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Email password reset link
+                                    {t('auth.forgot_password.submit')}
                                 </Button>
                             </div>
                         </>
@@ -58,8 +64,10 @@ export default function ForgotPasswordForm({
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Or, return to</span>
-                    <TextLink href={login()}>log in</TextLink>
+                    <span>{t('auth.forgot_password.return_to')}</span>
+                    <TextLink href={login()}>
+                        {t('auth.forgot_password.log_in')}
+                    </TextLink>
                 </div>
             </div>
         </>

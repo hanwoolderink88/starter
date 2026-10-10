@@ -16,7 +16,7 @@ class ShowAcceptInvitationController extends Controller
     public function __invoke(Request $request, User $user): Response|RedirectResponse
     {
         if ($user->password !== null) {
-            return redirect(route('login'))->with('info', 'Invitation already accepted. Please log in.');
+            return redirect(route('login'))->with('info', __('users.invitation.already_accepted'));
         }
 
         return Inertia::render('auth/accept-invitation', [

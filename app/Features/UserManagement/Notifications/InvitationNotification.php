@@ -36,11 +36,11 @@ class InvitationNotification extends Notification
         $url = URL::temporarySignedRoute('invitation.accept', now()->addHours(48), ['user' => $this->user->id]);
 
         return (new MailMessage)
-            ->subject('You\'ve been invited')
-            ->line('You have been invited to join our application.')
-            ->line('Click the button below to set up your account.')
-            ->action('Set Up Your Account', $url)
-            ->line('This link expires in 48 hours.');
+            ->subject(__('users.invitation.mail.subject'))
+            ->line(__('users.invitation.mail.intro', ['app' => config('app.name')]))
+            ->line(__('users.invitation.mail.instruction'))
+            ->action(__('users.invitation.mail.action'), $url)
+            ->line(__('users.invitation.mail.expiry'));
     }
 
     /**

@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import HeroSection from '@/components/welcome/hero-section';
 import Navigation from '@/components/welcome/navigation';
 import type { PageProps } from '@/types';
@@ -8,9 +9,10 @@ export default function Welcome({
     auth,
     canRegister,
 }: PageProps<WelcomePageData>) {
+    const { t } = useLaravelReactI18n();
     return (
         <>
-            <Head title="Welcome" />
+            <Head title={t('welcome.head')} />
             <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]">
                 <Navigation auth={auth} canRegister={canRegister} />
                 <HeroSection />

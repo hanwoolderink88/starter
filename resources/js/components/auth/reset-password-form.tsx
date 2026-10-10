@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ export default function ResetPasswordForm({
     email,
     passwordRules,
 }: ResetPasswordFormProps) {
+    const { t } = useLaravelReactI18n();
     return (
         <Form
             {...update.form()}
@@ -27,7 +29,9 @@ export default function ResetPasswordForm({
             {({ processing, errors }) => (
                 <div className="grid gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">
+                            {t('auth.reset_password.email')}
+                        </Label>
                         <Input
                             id="email"
                             type="email"
@@ -41,14 +45,16 @@ export default function ResetPasswordForm({
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">
+                            {t('auth.fields.password')}
+                        </Label>
                         <PasswordInput
                             id="password"
                             name="password"
                             autoComplete="new-password"
                             className="mt-1 block w-full"
                             autoFocus
-                            placeholder="Password"
+                            placeholder={t('auth.fields.password')}
                             passwordrules={passwordRules}
                         />
                         <InputError message={errors.password} />
@@ -56,14 +62,14 @@ export default function ResetPasswordForm({
 
                     <div className="grid gap-2">
                         <Label htmlFor="password_confirmation">
-                            Confirm password
+                            {t('auth.fields.password_confirmation')}
                         </Label>
                         <PasswordInput
                             id="password_confirmation"
                             name="password_confirmation"
                             autoComplete="new-password"
                             className="mt-1 block w-full"
-                            placeholder="Confirm password"
+                            placeholder={t('auth.fields.password_confirmation')}
                             passwordrules={passwordRules}
                         />
                         <InputError
@@ -79,7 +85,7 @@ export default function ResetPasswordForm({
                         data-test="reset-password-button"
                     >
                         {processing && <Spinner />}
-                        Reset password
+                        {t('auth.reset_password.submit')}
                     </Button>
                 </div>
             )}

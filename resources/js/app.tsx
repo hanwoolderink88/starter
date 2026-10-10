@@ -48,10 +48,10 @@ function getTransitionType(
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     strictMode: true,
-    withApp(app) {
+    withApp(app, { page }) {
         return (
             <LaravelReactI18nProvider
-                locale="en"
+                locale={page.props.locale}
                 fallbackLocale="en"
                 files={import.meta.glob('/lang/*.json', { eager: true })}
             >

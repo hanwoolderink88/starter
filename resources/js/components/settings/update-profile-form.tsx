@@ -1,4 +1,5 @@
 import { Form, Link, usePage } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import ProfileController from '@/actions/App/Features/Settings/Controllers/ProfileController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -13,6 +14,7 @@ export default function UpdateProfileForm({
     status,
 }: ProfilePageData) {
     const { auth } = usePage().props;
+    const { t } = useLaravelReactI18n();
 
     if (!auth.user) return null;
 
@@ -22,8 +24,8 @@ export default function UpdateProfileForm({
         <div className="space-y-6">
             <Heading
                 variant="small"
-                title="Profile information"
-                description="Update your name and email address"
+                title={t('settings.profile.heading')}
+                description={t('settings.profile.description')}
             />
 
             <Form
@@ -36,7 +38,9 @@ export default function UpdateProfileForm({
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">
+                                {t('settings.profile.name')}
+                            </Label>
 
                             <Input
                                 id="name"
@@ -45,7 +49,9 @@ export default function UpdateProfileForm({
                                 name="name"
                                 required
                                 autoComplete="name"
-                                placeholder="Full name"
+                                placeholder={t(
+                                    'settings.profile.name_placeholder',
+                                )}
                             />
 
                             <InputError
@@ -55,7 +61,9 @@ export default function UpdateProfileForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
+                            <Label htmlFor="email">
+                                {t('settings.profile.email')}
+                            </Label>
 
                             <Input
                                 id="email"
@@ -65,7 +73,9 @@ export default function UpdateProfileForm({
                                 name="email"
                                 required
                                 autoComplete="username"
-                                placeholder="Email address"
+                                placeholder={t(
+                                    'settings.profile.email_placeholder',
+                                )}
                             />
 
                             <InputError
@@ -77,21 +87,23 @@ export default function UpdateProfileForm({
                         {mustVerifyEmail && user.email_verified_at === null && (
                             <div>
                                 <p className="-mt-4 text-sm text-muted-foreground">
-                                    Your email address is unverified.{' '}
+                                    {t('settings.profile.unverified')}{' '}
                                     <Link
                                         href={send()}
                                         as="button"
                                         className="text-foreground underline decoration-muted-foreground/40 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
                                     >
-                                        Click here to resend the verification
-                                        email.
+                                        {t(
+                                            'settings.profile.resend_verification',
+                                        )}
                                     </Link>
                                 </p>
 
                                 {status === 'verification-link-sent' && (
                                     <div className="mt-2 text-sm font-medium text-success">
-                                        A new verification link has been sent to
-                                        your email address.
+                                        {t(
+                                            'settings.profile.verification_sent',
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -102,7 +114,7 @@ export default function UpdateProfileForm({
                                 disabled={processing}
                                 data-test="update-profile-button"
                             >
-                                Save
+                                {t('settings.profile.save')}
                             </Button>
                         </div>
                     </>

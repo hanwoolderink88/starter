@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import LoginForm from '@/components/auth/login-form';
 import AuthLayout from '@/layouts/auth-layout';
 import type { PageProps } from '@/types';
@@ -9,12 +10,13 @@ export default function Login({
     canResetPassword,
     canRegister,
 }: PageProps<LoginPageData>) {
+    const { t } = useLaravelReactI18n();
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title={t('auth.login.title')}
+            description={t('auth.login.description')}
         >
-            <Head title="Log in" />
+            <Head title={t('auth.login.head')} />
             <LoginForm
                 status={status}
                 canResetPassword={canResetPassword}

@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
@@ -22,6 +23,7 @@ export default function LoginForm({
     canResetPassword,
     canRegister,
 }: LoginFormProps) {
+    const { t } = useLaravelReactI18n();
     return (
         <>
             <Form
@@ -33,7 +35,9 @@ export default function LoginForm({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">
+                                    {t('auth.fields.email')}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -42,21 +46,25 @@ export default function LoginForm({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder={t(
+                                        'auth.fields.email_placeholder',
+                                    )}
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">
+                                        {t('auth.fields.password')}
+                                    </Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                            {t('auth.login.forgot_password')}
                                         </TextLink>
                                     )}
                                 </div>
@@ -66,7 +74,7 @@ export default function LoginForm({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder={t('auth.fields.password')}
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -77,7 +85,9 @@ export default function LoginForm({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">
+                                    {t('auth.fields.remember')}
+                                </Label>
                             </div>
 
                             <Button
@@ -88,15 +98,15 @@ export default function LoginForm({
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                {t('auth.login.submit')}
                             </Button>
                         </div>
 
                         {canRegister && (
                             <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
+                                {t('auth.login.no_account')}{' '}
                                 <TextLink href={register()} tabIndex={5}>
-                                    Sign up
+                                    {t('auth.login.sign_up')}
                                 </TextLink>
                             </div>
                         )}

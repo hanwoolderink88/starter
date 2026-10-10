@@ -82,6 +82,14 @@ return [
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
+    /*
+    | The languages a user can choose in Settings > Appearance. The SetLocale
+    | middleware picks the user's choice, then the browser's preference among
+    | these, then "locale". Every one needs a lang/<locale> directory.
+    */
+
+    'supported_locales' => ['en', 'nl'],
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*

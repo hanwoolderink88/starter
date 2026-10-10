@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -7,16 +8,19 @@ import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
 
 export default function ConfirmPasswordForm() {
+    const { t } = useLaravelReactI18n();
     return (
         <Form {...store.form()} resetOnSuccess={['password']}>
             {({ processing, errors }) => (
                 <div className="space-y-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">
+                            {t('auth.fields.password')}
+                        </Label>
                         <PasswordInput
                             id="password"
                             name="password"
-                            placeholder="Password"
+                            placeholder={t('auth.fields.password')}
                             autoComplete="current-password"
                             autoFocus
                         />
@@ -31,7 +35,7 @@ export default function ConfirmPasswordForm() {
                             data-test="confirm-password-button"
                         >
                             {processing && <Spinner />}
-                            Confirm password
+                            {t('auth.confirm_password.submit')}
                         </Button>
                     </div>
                 </div>

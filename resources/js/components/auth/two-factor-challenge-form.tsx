@@ -1,5 +1,6 @@
 import { Form } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/two-factor/login';
 
 export default function TwoFactorChallengeForm() {
+    const { t } = useLaravelReactI18n();
     const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
     const [code, setCode] = useState<string>('');
 
@@ -24,20 +26,18 @@ export default function TwoFactorChallengeForm() {
     }>(() => {
         if (showRecoveryInput) {
             return {
-                title: 'Recovery Code',
-                description:
-                    'Please confirm access to your account by entering one of your emergency recovery codes.',
-                toggleText: 'login using an authentication code',
+                title: t('auth.two_factor.recovery.title'),
+                description: t('auth.two_factor.recovery.description'),
+                toggleText: t('auth.two_factor.code.use_instead'),
             };
         }
 
         return {
-            title: 'Authentication Code',
-            description:
-                'Enter the authentication code provided by your authenticator application.',
-            toggleText: 'login using a recovery code',
+            title: t('auth.two_factor.code.title'),
+            description: t('auth.two_factor.code.description'),
+            toggleText: t('auth.two_factor.recovery.use_instead'),
         };
-    }, [showRecoveryInput]);
+    }, [showRecoveryInput, t]);
 
     return (
         <AuthLayout
@@ -58,7 +58,9 @@ export default function TwoFactorChallengeForm() {
                                     <Input
                                         name="recovery_code"
                                         type="text"
-                                        placeholder="Enter recovery code"
+                                        placeholder={t(
+                                            'auth.two_factor.recovery.placeholder',
+                                        )}
                                         autoFocus={showRecoveryInput}
                                         required
                                     />
@@ -100,11 +102,11 @@ export default function TwoFactorChallengeForm() {
                                 className="w-full"
                                 disabled={processing}
                             >
-                                Continue
+                                {t('auth.two_factor.submit')}
                             </Button>
 
                             <div className="text-center text-sm text-muted-foreground">
-                                <span>or you can </span>
+                                <span>{t('auth.two_factor.or')} </span>
                                 <button
                                     type="button"
                                     className="cursor-pointer text-foreground underline decoration-muted-foreground/40 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"

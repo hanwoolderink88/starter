@@ -7,6 +7,7 @@ export type UseTwoFactorAuthReturn = {
     manualSetupKey: string | null;
     recoveryCodesList: string[];
     hasSetupData: boolean;
+    /** Translation keys of what went wrong; translate them where shown. */
     errors: string[];
     clearErrors: () => void;
     clearSetupData: () => void;
@@ -46,7 +47,10 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             const { svg } = await fetchJson<TwoFactorSetupData>(qrCode.url());
             setQrCodeSvg(svg);
         } catch {
-            setErrors((prev) => [...prev, 'Failed to fetch QR code']);
+            setErrors((prev) => [
+                ...prev,
+                'settings.two_factor.errors.qr_code',
+            ]);
             setQrCodeSvg(null);
         }
     }, []);
@@ -58,7 +62,10 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             );
             setManualSetupKey(key);
         } catch {
-            setErrors((prev) => [...prev, 'Failed to fetch a setup key']);
+            setErrors((prev) => [
+                ...prev,
+                'settings.two_factor.errors.setup_key',
+            ]);
             setManualSetupKey(null);
         }
     }, []);
@@ -79,7 +86,10 @@ export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
             const codes = await fetchJson<string[]>(recoveryCodes.url());
             setRecoveryCodesList(codes);
         } catch {
-            setErrors((prev) => [...prev, 'Failed to fetch recovery codes']);
+            setErrors((prev) => [
+                ...prev,
+                'settings.two_factor.errors.recovery_codes',
+            ]);
             setRecoveryCodesList([]);
         }
     }, [clearErrors]);

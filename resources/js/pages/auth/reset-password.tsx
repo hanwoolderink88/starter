@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import ResetPasswordForm from '@/components/auth/reset-password-form';
 import AuthLayout from '@/layouts/auth-layout';
 import type { PageProps } from '@/types';
@@ -9,12 +10,13 @@ export default function ResetPassword({
     email,
     passwordRules,
 }: PageProps<ResetPasswordPageData>) {
+    const { t } = useLaravelReactI18n();
     return (
         <AuthLayout
-            title="Reset password"
-            description="Please enter your new password below"
+            title={t('auth.reset_password.title')}
+            description={t('auth.reset_password.description')}
         >
-            <Head title="Reset password" />
+            <Head title={t('auth.reset_password.head')} />
             <ResetPasswordForm
                 token={token}
                 email={email}

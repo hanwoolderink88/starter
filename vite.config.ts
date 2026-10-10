@@ -7,6 +7,22 @@ import { bunny } from 'laravel-vite-plugin/fonts';
 import i18n from 'laravel-react-i18n/vite';
 import { defineConfig, loadEnv } from 'vite';
 
+/**
+ * Compiles lang/<locale>/*.php into lang/php_<locale>.json so the
+ * LaravelReactI18nProvider can load PHP translations on the frontend.
+ *
+ * The plugin deletes those JSON files at the end of every build. A running
+ * dev server reads the same files, so a build next to `npm run dev` left the
+ * app showing bare translation keys. They are gitignored and regenerated on
+ * every start, so they stay.
+ */
+function translations() {
+    const plugin = i18n();
+    delete plugin.buildEnd;
+
+    return plugin;
+}
+
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
 
@@ -61,9 +77,7 @@ export default defineConfig(({ mode }) => {
             wayfinder({
                 formVariants: true,
             }),
-            // Compiles lang/<locale>/*.php into lang/php_<locale>.json so the
-            // LaravelReactI18nProvider can load PHP translations on the frontend.
-            i18n(),
+            translations(),
         ],
         esbuild: {
             jsx: 'automatic',

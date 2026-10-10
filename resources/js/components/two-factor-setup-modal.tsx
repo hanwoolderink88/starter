@@ -1,5 +1,6 @@
 import { Form } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { Check, Copy, ScanLine } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
@@ -62,6 +63,7 @@ function TwoFactorSetupStep({
     onNextStep: () => void;
     errors: string[];
 }) {
+    const { t } = useLaravelReactI18n();
     const { resolvedAppearance } = useAppearance();
     const [copiedText, copy] = useClipboard();
     const IconComponent = copiedText === manualSetupKey ? Check : Copy;
@@ -69,7 +71,7 @@ function TwoFactorSetupStep({
     return (
         <>
             {errors?.length ? (
-                <AlertError errors={errors} />
+                <AlertError errors={errors.map((error) => t(error))} />
             ) : (
                 <>
                     <div className="mx-auto flex max-w-md overflow-hidden">
@@ -104,7 +106,7 @@ function TwoFactorSetupStep({
                     <div className="relative flex w-full items-center justify-center">
                         <div className="absolute inset-0 top-1/2 h-px w-full bg-border" />
                         <span className="relative bg-card px-2 py-1">
-                            or, enter the code manually
+                            {t('settings.two_factor.setup.manual')}
                         </span>
                     </div>
 
@@ -123,7 +125,11 @@ function TwoFactorSetupStep({
                                         className="h-full w-full bg-background p-3 text-foreground outline-none"
                                     />
                                     <button
+                                        type="button"
                                         onClick={() => copy(manualSetupKey)}
+                                        aria-label={t(
+                                            'settings.two_factor.setup.copy_key',
+                                        )}
                                         className="border-l border-border px-3 hover:bg-muted"
                                     >
                                         <IconComponent className="w-4" />
@@ -145,6 +151,7 @@ function TwoFactorVerificationStep({
     onClose: () => void;
     onBack: () => void;
 }) {
+    const { t } = useLaravelReactI18n();
     const [code, setCode] = useState<string>('');
     const pinInputContainerRef = useRef<HTMLDivElement>(null);
 
@@ -210,7 +217,7 @@ function TwoFactorVerificationStep({
                                 onClick={onBack}
                                 disabled={processing}
                             >
-                                Back
+                                {t('settings.two_factor.setup.back')}
                             </Button>
                             <Button
                                 type="submit"
@@ -219,7 +226,7 @@ function TwoFactorVerificationStep({
                                     processing || code.length < OTP_MAX_LENGTH
                                 }
                             >
-                                Confirm
+                                {t('settings.two_factor.setup.confirm')}
                             </Button>
                         </div>
                     </div>
@@ -252,6 +259,7 @@ export default function TwoFactorSetupModal({
     fetchSetupData,
     errors,
 }: Props) {
+    const { t } = useLaravelReactI18n();
     const [showVerificationStep, setShowVerificationStep] =
         useState<boolean>(false);
 
@@ -262,29 +270,26 @@ export default function TwoFactorSetupModal({
     }>(() => {
         if (twoFactorEnabled) {
             return {
-                title: 'Two-Factor Authentication Enabled',
-                description:
-                    'Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.',
-                buttonText: 'Close',
+                title: t('settings.two_factor.setup.enabled_title'),
+                description: t('settings.two_factor.setup.enabled_description'),
+                buttonText: t('settings.two_factor.setup.close'),
             };
         }
 
         if (showVerificationStep) {
             return {
-                title: 'Verify Authentication Code',
-                description:
-                    'Enter the 6-digit code from your authenticator app',
-                buttonText: 'Continue',
+                title: t('settings.two_factor.setup.verify_title'),
+                description: t('settings.two_factor.setup.verify_description'),
+                buttonText: t('settings.two_factor.setup.continue'),
             };
         }
 
         return {
-            title: 'Enable Two-Factor Authentication',
-            description:
-                'To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app',
-            buttonText: 'Continue',
+            title: t('settings.two_factor.setup.enable_title'),
+            description: t('settings.two_factor.setup.enable_description'),
+            buttonText: t('settings.two_factor.setup.continue'),
         };
-    }, [twoFactorEnabled, showVerificationStep]);
+    }, [twoFactorEnabled, showVerificationStep, t]);
 
     const handleModalNextStep = useCallback(() => {
         if (requiresConfirmation) {
