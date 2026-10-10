@@ -1,6 +1,5 @@
 <?php
 
-use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Notifications\InvitationNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
@@ -37,7 +36,6 @@ test('admins can create a user', function () {
     $this->post(route('users.store'), [
         'name' => 'New User',
         'email' => 'newuser@example.com',
-        'role' => Role::User->value,
     ])->assertRedirect(route('users.index'));
 
     $this->assertDatabaseHas('users', [
@@ -55,7 +53,6 @@ test('invitation notification is sent when creating a user', function () {
     $response = $this->post(route('users.store'), [
         'name' => 'New User',
         'email' => 'newuser@example.com',
-        'role' => Role::User->value,
     ]);
 
     $response->assertRedirect(route('users.index'));
@@ -71,7 +68,7 @@ test('store validates required fields', function () {
     $this->actingAs(createAdmin());
 
     $this->post(route('users.store'), [])
-        ->assertSessionHasErrors(['name', 'email', 'role']);
+        ->assertSessionHasErrors(['name', 'email']);
 });
 
 test('store validates unique email', function () {
@@ -81,7 +78,6 @@ test('store validates unique email', function () {
     $this->post(route('users.store'), [
         'name' => 'Duplicate',
         'email' => $existing->email,
-        'role' => Role::User->value,
     ])->assertSessionHasErrors(['email']);
 });
 
@@ -96,10 +92,10 @@ test('admins can update a user', function () {
     $this->actingAs(createAdmin());
     $user = createRegularUser();
 
-    $this->put(route('users.update', $user), [
+    $this->put(route('users.update', $user), ['version' => $user->fresh()->version,
         'name' => 'Updated Name',
         'email' => 'updated@example.com',
-        'role' => Role::SuperAdmin->value,
+        'role_ids' => [administratorRole()->id],
     ])->assertRedirect(route('users.index'));
 
     $this->assertDatabaseHas('users', [
@@ -116,7 +112,7 @@ test('admins can delete a user', function () {
     $this->delete(route('users.destroy', $user))
         ->assertRedirect(route('users.index'));
 
-    $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    $this->assertSoftDeleted($user);
 });
 
 test('admins cannot delete themselves', function () {
@@ -132,7 +128,6 @@ test('regular users cannot create users', function () {
     $this->post(route('users.store'), [
         'name' => 'Test',
         'email' => 'test@example.com',
-        'role' => Role::User->value,
     ])->assertForbidden();
 });
 
@@ -140,10 +135,9 @@ test('regular users cannot update users', function () {
     $this->actingAs(createRegularUser());
     $target = createRegularUser();
 
-    $this->put(route('users.update', $target), [
+    $this->put(route('users.update', $target), ['version' => $target->fresh()->version,
         'name' => 'Hacked',
         'email' => 'hacked@example.com',
-        'role' => Role::User->value,
     ])->assertForbidden();
 });
 

@@ -7,7 +7,10 @@ import { create, index } from '@/routes/users';
 import type { BreadcrumbItem, PageProps } from '@/types';
 import type { UserFormPageData } from '@/types/generated';
 
-export default function CreateUser({ roles }: PageProps<UserFormPageData>) {
+export default function CreateUser({
+    roles,
+    canAssignRoles,
+}: PageProps<UserFormPageData>) {
     const { t } = useLaravelReactI18n();
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -31,7 +34,7 @@ export default function CreateUser({ roles }: PageProps<UserFormPageData>) {
                     description={t('users.form.create_description')}
                 />
 
-                <CreateUserForm roles={roles} />
+                <CreateUserForm roles={roles} canAssignRoles={canAssignRoles} />
             </div>
         </AppLayout>
     );

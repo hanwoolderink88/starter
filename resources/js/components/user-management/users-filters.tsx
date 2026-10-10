@@ -21,19 +21,19 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import type { UserFiltersData } from '@/types/generated';
+import type { AssignableRoleData, UserFiltersData } from '@/types/generated';
 
 const ALL = 'all';
 
 export type UserFilterChange = Partial<{
     search: string | null;
-    role: string | null;
+    role: number | null;
     status: string | null;
 }>;
 
 type FilterControlsProps = {
     filters: UserFiltersData;
-    roleOptions: Record<string, string>;
+    roleOptions: AssignableRoleData[];
     statusOptions: Record<string, string>;
     onChange: (change: UserFilterChange) => void;
     /** `stacked` renders labelled, full-width controls for the mobile sheet. */
@@ -53,9 +53,9 @@ function FilterControls({
 
     const role = (
         <Select
-            value={filters.role ?? ALL}
+            value={filters.roleId === null ? ALL : String(filters.roleId)}
             onValueChange={(value) =>
-                onChange({ role: value === ALL ? null : value })
+                onChange({ role: value === ALL ? null : Number(value) })
             }
         >
             <SelectTrigger
@@ -68,9 +68,9 @@ function FilterControls({
                 <SelectItem value={ALL}>
                     {t('users.filters.all_roles')}
                 </SelectItem>
-                {Object.entries(roleOptions).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                        {label}
+                {roleOptions.map((role) => (
+                    <SelectItem key={role.id} value={String(role.id)}>
+                        {role.name}
                     </SelectItem>
                 ))}
             </SelectContent>
@@ -94,9 +94,9 @@ function FilterControls({
                 <SelectItem value={ALL}>
                     {t('users.filters.all_statuses')}
                 </SelectItem>
-                {Object.entries(statusOptions).map(([value, label]) => (
+                {Object.keys(statusOptions).map((value) => (
                     <SelectItem key={value} value={value}>
-                        {label}
+                        {t(`users.status.${value}`)}
                     </SelectItem>
                 ))}
             </SelectContent>
@@ -133,7 +133,7 @@ export default function UsersFilters({
     onChange,
 }: {
     filters: UserFiltersData;
-    roleOptions: Record<string, string>;
+    roleOptions: AssignableRoleData[];
     statusOptions: Record<string, string>;
     onChange: (change: UserFilterChange) => void;
 }) {
@@ -142,7 +142,9 @@ export default function UsersFilters({
     const mounted = useRef(false);
 
     // Number of active secondary filters — shown as a badge on the mobile button.
-    const activeCount = [filters.role, filters.status].filter(Boolean).length;
+    const activeCount = [filters.roleId, filters.status].filter(
+        (value) => value !== null,
+    ).length;
 
     // Debounce the free-text search; selects apply immediately on change.
     useEffect(() => {

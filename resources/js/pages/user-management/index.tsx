@@ -28,7 +28,8 @@ export default function UsersIndex({
     roleOptions,
     statusOptions,
     canCreate,
-    canImpersonate,
+    impersonatableIds,
+    restoreDays,
 }: PageProps<UsersPageData>) {
     const { t } = useLaravelReactI18n();
     const [deleteTarget, setDeleteTarget] = useState<UserManagementData | null>(
@@ -46,7 +47,7 @@ export default function UsersIndex({
     // changing one dimension preserves the others.
     const query = {
         search: filters.search ?? undefined,
-        role: filters.role ?? undefined,
+        role: filters.roleId ?? undefined,
         status: filters.status ?? undefined,
         sort: sort.column,
         direction: sort.direction,
@@ -91,10 +92,10 @@ export default function UsersIndex({
         only: ['users'],
         mode: 'auto',
         invalidateTags: (event) => [`user.${event.id}`],
-        describe: (event) =>
+        describe: (event, actor) =>
             t(`users.realtime.${event.action}`, {
                 name: event.label,
-                actor: event.actorName,
+                actor,
             }),
     });
 
@@ -127,9 +128,8 @@ export default function UsersIndex({
 
                 <UsersTable
                     users={users.data}
-                    roleOptions={roleOptions}
                     sort={sort}
-                    canImpersonate={canImpersonate}
+                    impersonatableIds={impersonatableIds}
                     onSort={handleSort}
                     onDeleteRequest={setDeleteTarget}
                 />
@@ -139,6 +139,7 @@ export default function UsersIndex({
 
             <DeleteUserDialog
                 user={deleteTarget}
+                restoreDays={restoreDays}
                 onClose={() => setDeleteTarget(null)}
             />
         </AppLayout>

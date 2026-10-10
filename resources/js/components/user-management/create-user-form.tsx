@@ -5,24 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import RoleChecklist from '@/components/user-management/role-checklist';
 import { store } from '@/routes/users';
 import type { UserFormPageData } from '@/types/generated';
 
 export default function CreateUserForm({
     roles,
-}: Pick<UserFormPageData, 'roles'>) {
+    canAssignRoles,
+}: Pick<UserFormPageData, 'roles' | 'canAssignRoles'>) {
     const { t } = useLaravelReactI18n();
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<{
+        name: string;
+        email: string;
+        role_ids: number[];
+    }>({
         name: '',
         email: '',
-        role: '',
+        role_ids: [],
     });
 
     function submit(e: React.FormEvent) {
@@ -61,29 +60,13 @@ export default function CreateUserForm({
                         <InputError message={errors.email} />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="role">{t('users.form.role')}</Label>
-                        <Select
-                            value={data.role}
-                            onValueChange={(value) => setData('role', value)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue
-                                    placeholder={t(
-                                        'users.form.role_placeholder',
-                                    )}
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(roles).map(([value, label]) => (
-                                    <SelectItem key={value} value={value}>
-                                        {label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={errors.role} />
-                    </div>
+                    <RoleChecklist
+                        roles={roles}
+                        selectedIds={data.role_ids}
+                        readOnly={!canAssignRoles}
+                        onChange={(ids) => setData('role_ids', ids)}
+                        error={errors.role_ids}
+                    />
 
                     <Button disabled={processing}>
                         {t('users.form.create')}

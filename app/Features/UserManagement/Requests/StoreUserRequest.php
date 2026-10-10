@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Features\UserManagement\Requests;
 
-use App\Features\UserManagement\Enums\Role;
+use App\Features\UserManagement\Requests\Concerns\HasRoleFields;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
+    use HasRoleFields;
+
     /**
      * @return array<string, array<mixed>>
      */
@@ -17,8 +19,8 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'role' => ['required', new Enum(Role::class)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->withoutTrashed()],
+            ...$this->roleRules(),
         ];
     }
 }

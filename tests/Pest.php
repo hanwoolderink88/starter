@@ -44,38 +44,54 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-use App\Features\UserManagement\Enums\Permission;
-use App\Features\UserManagement\Enums\Role;
+use App\Features\Roles\Actions\SeedDefaultRolesAction;
+use App\Features\Roles\Enums\Permission;
+use App\Features\Roles\Models\Role;
+use App\Infrastructure\Activity\Data\ChangeContext;
 use App\Models\User;
-use Spatie\Permission\Models\Permission as PermissionModel;
-use Spatie\Permission\Models\Role as RoleModel;
 
 /**
- * Seed the UserManagement roles and permissions used across feature tests.
+ * Seed the permissions and the default roles (Administrator and User) used
+ * across feature tests.
  */
 function seedUserRolesAndPermissions(): void
 {
-    foreach (Permission::cases() as $permission) {
-        PermissionModel::findOrCreate($permission->value, 'web');
-    }
+    app(SeedDefaultRolesAction::class)->handle(ChangeContext::system());
+}
 
-    $superAdminRole = RoleModel::findOrCreate(Role::SuperAdmin->value, 'web');
-    $superAdminRole->givePermissionTo(PermissionModel::all());
-    RoleModel::findOrCreate(Role::User->value, 'web');
+function administratorRole(): Role
+{
+    return Role::query()->withoutGlobalScope(Role::ACTIVE_SCOPE)->where('is_protected', true)->sole();
 }
 
 function createAdmin(): User
 {
     $admin = User::factory()->create();
-    $admin->assignRole(Role::SuperAdmin);
+    $admin->assignRole(administratorRole());
 
     return $admin;
+}
+
+function userRole(): Role
+{
+    return Role::query()->withoutGlobalScope(Role::ACTIVE_SCOPE)->where('name', SeedDefaultRolesAction::USER_NAME)->sole();
 }
 
 function createRegularUser(): User
 {
     $user = User::factory()->create();
-    $user->assignRole(Role::User);
+    $user->assignRole(userRole());
+
+    return $user;
+}
+
+/**
+ * A user whose only role grants exactly these permissions.
+ */
+function userWithPermissions(Permission ...$permissions): User
+{
+    $user = User::factory()->create();
+    $user->assignRole(Role::factory()->withPermissions($permissions)->create());
 
     return $user;
 }

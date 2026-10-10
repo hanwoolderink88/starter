@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useLaravelReactI18n } from 'laravel-react-i18n';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -14,9 +15,11 @@ import type { UserManagementData } from '@/types/generated';
 
 export default function DeleteUserDialog({
     user,
+    restoreDays,
     onClose,
 }: {
     user: UserManagementData | null;
+    restoreDays: number;
     onClose: () => void;
 }) {
     const { t } = useLaravelReactI18n();
@@ -26,6 +29,13 @@ export default function DeleteUserDialog({
 
         router.delete(destroy(user.id).url, {
             onSuccess: () => onClose(),
+            // The last administrator cannot be deleted.
+            onError: (errors) => {
+                if (errors.user) {
+                    toast.error(errors.user);
+                    onClose();
+                }
+            },
         });
     }
 
@@ -39,6 +49,7 @@ export default function DeleteUserDialog({
                 <DialogDescription>
                     {t('users.delete_dialog.description', {
                         name: user?.name ?? '',
+                        days: String(restoreDays),
                     })}
                 </DialogDescription>
                 <DialogFooter className="gap-2">

@@ -7,6 +7,7 @@ import {
     Loader2,
     Mail,
     Pencil,
+    RotateCcw,
     Trash2,
     UserCheck,
 } from 'lucide-react';
@@ -22,14 +23,24 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import RoleBadges from '@/components/user-management/role-badges';
 import WithTooltip from '@/components/with-tooltip';
-import { edit, impersonate, resendInvitation, show } from '@/routes/users';
+import { useImpersonation } from '@/hooks/use-impersonation';
+import { usePermissions } from '@/hooks/use-permissions';
+import { cn } from '@/lib/utils';
+import { edit, resendInvitation, restore, show } from '@/routes/users';
 import {
+    Permission,
     SortDirection,
     UserSortColumn,
     type UserManagementData,
     type UserSortData,
 } from '@/types/generated';
+
+/** A deleted user who can still be restored: listed under the Deleted filter. */
+function isDeleted(user: UserManagementData): boolean {
+    return user.anonymizes_on_display !== null;
+}
 
 function SortableHead({
     column,
@@ -71,30 +82,28 @@ function SortableHead({
 
 export default function UsersTable({
     users,
-    roleOptions,
     sort,
-    canImpersonate,
+    impersonatableIds,
     onSort,
     onDeleteRequest,
 }: {
     users: UserManagementData[];
-    roleOptions: Record<string, string>;
     sort: UserSortData;
-    canImpersonate: boolean;
+    /** The users on this page the viewer may impersonate now. */
+    impersonatableIds: number[];
     onSort: (column: UserSortColumn) => void;
     onDeleteRequest: (user: UserManagementData) => void;
 }) {
     const { t } = useLaravelReactI18n();
     const { auth } = usePage().props;
+    const { start: impersonate } = useImpersonation();
+    const { can } = usePermissions();
+    const canRestore = can(Permission.DeleteUsers);
     const [resendingId, setResendingId] = useState<number | null>(null);
 
     if (!auth.user) return null;
 
     const currentUser = auth.user;
-
-    function handleImpersonate(user: UserManagementData) {
-        router.post(impersonate(user.id).url);
-    }
 
     function handleResendInvitation(user: UserManagementData) {
         router.post(
@@ -159,46 +168,67 @@ export default function UsersTable({
                         {users.map((user: UserManagementData) => (
                             <TableRow
                                 key={user.id}
-                                onClick={() => router.visit(show(user.id).url)}
-                                className="cursor-pointer"
+                                onClick={() =>
+                                    !isDeleted(user) &&
+                                    router.visit(show(user.id).url)
+                                }
+                                className={cn(
+                                    !isDeleted(user) && 'cursor-pointer',
+                                )}
                             >
                                 <TableCell className="font-medium">
-                                    {/* Real link so the row's default action is
-                                        keyboard- and screen-reader-accessible. */}
-                                    <Link
-                                        href={show(user.id)}
-                                        className="hover:underline focus-visible:underline focus-visible:outline-none"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        {user.name}
-                                    </Link>
+                                    {isDeleted(user) ? (
+                                        <span className="text-muted-foreground">
+                                            {user.name}
+                                        </span>
+                                    ) : (
+                                        // Real link so the row's default action
+                                        // is keyboard- and screen-reader-accessible.
+                                        <Link
+                                            href={show(user.id)}
+                                            className="hover:underline focus-visible:underline focus-visible:outline-none"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            {user.name}
+                                        </Link>
+                                    )}
                                 </TableCell>
                                 <TableCell className="hidden sm:table-cell">
                                     {user.email}
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
-                                    <Badge
-                                        variant={
-                                            user.role === 'super-admin'
-                                                ? 'default'
-                                                : 'secondary'
-                                        }
-                                    >
-                                        {roleOptions[user.role] ?? user.role}
-                                    </Badge>
+                                    <RoleBadges roles={user.roles} />
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
-                                    <Badge
-                                        variant={
-                                            user.has_password
-                                                ? 'success'
-                                                : 'warning'
-                                        }
-                                    >
-                                        {user.has_password
-                                            ? t('users.status.active')
-                                            : t('users.status.invited')}
-                                    </Badge>
+                                    {isDeleted(user) ? (
+                                        <div className="space-y-0.5">
+                                            <Badge variant="destructive">
+                                                {t('users.status.deleted')}
+                                            </Badge>
+                                            <p className="text-xs text-muted-foreground">
+                                                {t(
+                                                    'users.deleted.anonymizes_on',
+                                                    {
+                                                        date:
+                                                            user.anonymizes_on_display ??
+                                                            '',
+                                                    },
+                                                )}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <Badge
+                                            variant={
+                                                user.has_password
+                                                    ? 'success'
+                                                    : 'warning'
+                                            }
+                                        >
+                                            {user.has_password
+                                                ? t('users.status.active')
+                                                : t('users.status.invited')}
+                                        </Badge>
+                                    )}
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">
                                     {user.created_at_display}
@@ -207,35 +237,11 @@ export default function UsersTable({
                                     className="text-right"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <div className="flex items-center justify-end gap-0.5">
-                                        <WithTooltip
-                                            label={t('users.actions.edit')}
-                                        >
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="size-8"
-                                                aria-label={t(
-                                                    'users.actions.edit',
-                                                )}
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={edit(user.id)}
-                                                    prefetch
-                                                    cacheTags={[
-                                                        `user.${user.id}`,
-                                                    ]}
-                                                >
-                                                    <Pencil className="size-4" />
-                                                </Link>
-                                            </Button>
-                                        </WithTooltip>
-
-                                        {!user.has_password && (
+                                    {isDeleted(user) ? (
+                                        canRestore && (
                                             <WithTooltip
                                                 label={t(
-                                                    'users.actions.resend_invitation',
+                                                    'users.actions.restore',
                                                 )}
                                             >
                                                 <Button
@@ -243,28 +249,85 @@ export default function UsersTable({
                                                     size="icon"
                                                     className="size-8"
                                                     aria-label={t(
-                                                        'users.actions.resend_invitation',
+                                                        'users.actions.restore',
                                                     )}
                                                     onClick={() =>
-                                                        handleResendInvitation(
-                                                            user,
+                                                        router.post(
+                                                            restore(user.id)
+                                                                .url,
+                                                            {},
+                                                            {
+                                                                preserveScroll: true,
+                                                            },
                                                         )
                                                     }
-                                                    disabled={
-                                                        resendingId === user.id
-                                                    }
                                                 >
-                                                    {resendingId === user.id ? (
-                                                        <Loader2 className="size-4 animate-spin" />
-                                                    ) : (
-                                                        <Mail className="size-4" />
-                                                    )}
+                                                    <RotateCcw className="size-4" />
                                                 </Button>
                                             </WithTooltip>
-                                        )}
+                                        )
+                                    ) : (
+                                        <div className="flex items-center justify-end gap-0.5">
+                                            <WithTooltip
+                                                label={t('users.actions.edit')}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-8"
+                                                    aria-label={t(
+                                                        'users.actions.edit',
+                                                    )}
+                                                    asChild
+                                                >
+                                                    <Link
+                                                        href={edit(user.id)}
+                                                        prefetch
+                                                        cacheTags={[
+                                                            `user.${user.id}`,
+                                                        ]}
+                                                    >
+                                                        <Pencil className="size-4" />
+                                                    </Link>
+                                                </Button>
+                                            </WithTooltip>
 
-                                        {canImpersonate &&
-                                            user.id !== currentUser.id && (
+                                            {!user.has_password && (
+                                                <WithTooltip
+                                                    label={t(
+                                                        'users.actions.resend_invitation',
+                                                    )}
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8"
+                                                        aria-label={t(
+                                                            'users.actions.resend_invitation',
+                                                        )}
+                                                        onClick={() =>
+                                                            handleResendInvitation(
+                                                                user,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            resendingId ===
+                                                            user.id
+                                                        }
+                                                    >
+                                                        {resendingId ===
+                                                        user.id ? (
+                                                            <Loader2 className="size-4 animate-spin" />
+                                                        ) : (
+                                                            <Mail className="size-4" />
+                                                        )}
+                                                    </Button>
+                                                </WithTooltip>
+                                            )}
+
+                                            {impersonatableIds.includes(
+                                                user.id,
+                                            ) && (
                                                 <WithTooltip
                                                     label={t(
                                                         'users.actions.impersonate',
@@ -278,9 +341,7 @@ export default function UsersTable({
                                                             'users.actions.impersonate',
                                                         )}
                                                         onClick={() =>
-                                                            handleImpersonate(
-                                                                user,
-                                                            )
+                                                            impersonate(user.id)
                                                         }
                                                     >
                                                         <UserCheck className="size-4" />
@@ -288,28 +349,31 @@ export default function UsersTable({
                                                 </WithTooltip>
                                             )}
 
-                                        {user.id !== currentUser.id && (
-                                            <WithTooltip
-                                                label={t(
-                                                    'users.actions.delete',
-                                                )}
-                                            >
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="size-8 text-destructive hover:text-destructive"
-                                                    aria-label={t(
+                                            {user.id !== currentUser.id && (
+                                                <WithTooltip
+                                                    label={t(
                                                         'users.actions.delete',
                                                     )}
-                                                    onClick={() =>
-                                                        onDeleteRequest(user)
-                                                    }
                                                 >
-                                                    <Trash2 className="size-4" />
-                                                </Button>
-                                            </WithTooltip>
-                                        )}
-                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8 text-destructive hover:text-destructive"
+                                                        aria-label={t(
+                                                            'users.actions.delete',
+                                                        )}
+                                                        onClick={() =>
+                                                            onDeleteRequest(
+                                                                user,
+                                                            )
+                                                        }
+                                                    >
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </WithTooltip>
+                                            )}
+                                        </div>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}

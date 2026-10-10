@@ -1,6 +1,5 @@
 <?php
 
-use App\Features\UserManagement\Enums\Role;
 use App\Models\User;
 
 beforeEach(function () {
@@ -25,7 +24,7 @@ test('new users can register', function () {
     $response->assertRedirect(route('dashboard', absolute: false));
 });
 
-test('newly registered users are assigned the user role', function () {
+test('newly registered users get no role, and so no permissions', function () {
     $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -35,5 +34,6 @@ test('newly registered users are assigned the user role', function () {
 
     $user = User::where('email', 'test@example.com')->firstOrFail();
 
-    expect($user->hasRole(Role::User))->toBeTrue();
+    expect($user->roles()->exists())->toBeFalse()
+        ->and($user->getAllPermissions())->toBeEmpty();
 });

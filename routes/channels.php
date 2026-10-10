@@ -1,5 +1,6 @@
 <?php
 
+use App\Features\Roles\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -15,6 +16,15 @@ Broadcast::channel('user.{id}', function (User $user, int $id): bool {
     $target = User::find($id);
 
     return $target !== null && $user->can('view', $target);
+});
+
+// Co-working channels for the Roles feature.
+Broadcast::channel('roles', fn (User $user): bool => $user->can('viewAny', Role::class));
+
+Broadcast::channel('role.{id}', function (User $user, int $id): bool {
+    $role = Role::query()->withoutGlobalScope(Role::ACTIVE_SCOPE)->find($id);
+
+    return $role !== null && $user->can('view', $role);
 });
 
 // Presence channel powering "who else is viewing this user" awareness.

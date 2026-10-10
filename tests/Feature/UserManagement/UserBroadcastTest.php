@@ -1,9 +1,9 @@
 <?php
 
-use App\Broadcasting\Data\ResourceChangedData;
-use App\Broadcasting\Enums\ResourceAction;
-use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Events\UserChanged;
+use App\Infrastructure\Activity\Enums\ActivitySource;
+use App\Infrastructure\Broadcasting\Data\ResourceChangedData;
+use App\Infrastructure\Broadcasting\Enums\ResourceAction;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Facades\Event;
 
@@ -18,7 +18,6 @@ test('creating a user broadcasts UserChanged with the actor', function () {
     $this->actingAs($admin)->post(route('users.store'), [
         'name' => 'New User',
         'email' => 'newuser@example.com',
-        'role' => Role::User->value,
     ]);
 
     Event::assertDispatched(
@@ -37,7 +36,6 @@ test('a web request threads its X-Client-Id header into the broadcast origin', f
         ->post(route('users.store'), [
             'name' => 'New User',
             'email' => 'newuser@example.com',
-            'role' => Role::User->value,
         ]);
 
     Event::assertDispatched(
@@ -53,7 +51,6 @@ test('a request with no client id broadcasts a null origin so every browser upda
     $this->actingAs($admin)->post(route('users.store'), [
         'name' => 'Headless User',
         'email' => 'headless@example.com',
-        'role' => Role::User->value,
     ]);
 
     Event::assertDispatched(
@@ -67,10 +64,9 @@ test('updating a user broadcasts UserChanged for that user', function () {
     $admin = createAdmin();
     $user = createRegularUser();
 
-    $this->actingAs($admin)->put(route('users.update', $user), [
+    $this->actingAs($admin)->put(route('users.update', $user), ['version' => $user->fresh()->version,
         'name' => 'Updated Name',
         'email' => 'updated@example.com',
-        'role' => Role::User->value,
     ]);
 
     Event::assertDispatched(
@@ -101,6 +97,7 @@ test('UserChanged broadcasts a thin signal on both channels', function () {
         label: 'Jane Doe',
         actorId: 1,
         actorName: 'Admin',
+        source: ActivitySource::Web,
     ));
 
     $channelNames = array_map(
@@ -117,6 +114,8 @@ test('UserChanged broadcasts a thin signal on both channels', function () {
         'label' => 'Jane Doe',
         'actorId' => 1,
         'actorName' => 'Admin',
+        'source' => 'web',
         'origin' => null,
+        'impersonatorName' => null,
     ]);
 });

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Features\UserManagement\Controllers;
 
+use App\Features\Roles\Exceptions\LastAdministratorException;
 use App\Features\UserManagement\Actions\DeleteUserAction;
 use App\Http\Controllers\Controller;
+use App\Infrastructure\Activity\Data\ChangeContext;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class DestroyUserController extends Controller
@@ -29,7 +32,11 @@ class DestroyUserController extends Controller
 
         Gate::authorize('delete', $user);
 
-        $this->deleteUserAction->handle($user, $actor, $request->header('X-Client-Id'));
+        try {
+            $this->deleteUserAction->handle($user, ChangeContext::fromRequest($request));
+        } catch (LastAdministratorException) {
+            throw ValidationException::withMessages(['user' => __('roles.last_administrator')]);
+        }
 
         return redirect()->route('users.index');
     }

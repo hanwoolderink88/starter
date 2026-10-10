@@ -8,7 +8,13 @@ import { edit, index } from '@/routes/users';
 import type { BreadcrumbItem, PageProps } from '@/types';
 import type { UserFormPageData } from '@/types/generated';
 
-export default function EditUser({ user, roles }: PageProps<UserFormPageData>) {
+export default function EditUser({
+    user,
+    roles,
+    roleIds,
+    canAssignRoles,
+    isLastAdministrator,
+}: PageProps<UserFormPageData>) {
     const { t } = useLaravelReactI18n();
 
     if (!user) return null;
@@ -36,7 +42,13 @@ export default function EditUser({ user, roles }: PageProps<UserFormPageData>) {
 
                 <RecordViewers channel={`viewing.user.${user.id}`} />
 
-                <EditUserForm user={user} roles={roles} />
+                <EditUserForm
+                    user={user}
+                    roles={roles}
+                    roleIds={roleIds}
+                    canAssignRoles={canAssignRoles}
+                    isLastAdministrator={isLastAdministrator}
+                />
             </div>
         </AppLayout>
     );

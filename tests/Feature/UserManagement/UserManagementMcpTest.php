@@ -1,6 +1,5 @@
 <?php
 
-use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Mcp\Servers\UserManagementServer;
 use App\Features\UserManagement\Mcp\Tools\CreateUserTool;
 use App\Features\UserManagement\Mcp\Tools\SearchUsersTool;
@@ -67,7 +66,6 @@ test('super admin can create a user and an invitation is sent', function () {
         ->tool(CreateUserTool::class, [
             'name' => 'Created Via Mcp',
             'email' => 'mcp-created@example.com',
-            'role' => Role::User->value,
         ])
         ->assertOk()
         ->assertSee('mcp-created@example.com');
@@ -90,7 +88,6 @@ test('user_create works when authenticated via the api guard', function () {
         ->tool(CreateUserTool::class, [
             'name' => 'Api Guard User',
             'email' => 'api-guard@example.com',
-            'role' => Role::User->value,
         ])
         ->assertOk()
         ->assertSee('api-guard@example.com');
@@ -106,7 +103,6 @@ test('user_create validates a unique email', function () {
         ->tool(CreateUserTool::class, [
             'name' => 'Duplicate',
             'email' => $existing->email,
-            'role' => Role::User->value,
         ])
         ->assertHasErrors();
 });
@@ -116,7 +112,6 @@ test('user_create is hidden from users without create permission and creates not
         ->tool(CreateUserTool::class, [
             'name' => 'Should Not Exist',
             'email' => 'blocked@example.com',
-            'role' => Role::User->value,
         ])
         ->assertHasErrors(['Tool [user_create] not found.']);
 

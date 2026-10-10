@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Features\UserManagement\Controllers;
 
 use App\Features\UserManagement\Actions\CreateUserAction;
-use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Requests\StoreUserRequest;
 use App\Http\Controllers\Controller;
+use App\Infrastructure\Activity\Data\ChangeContext;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -22,15 +22,17 @@ class StoreUserController extends Controller
     {
         Gate::authorize('create', User::class);
 
-        $actor = $request->user();
-        assert($actor instanceof User);
+        $roleIds = $request->roleIds() ?? [];
+
+        if ($roleIds !== []) {
+            Gate::authorize('assignRoles', User::class);
+        }
 
         $this->createUserAction->handle(
             $request->validated('name'),
             $request->validated('email'),
-            Role::from($request->validated('role')),
-            $actor,
-            $request->header('X-Client-Id'),
+            $roleIds,
+            ChangeContext::fromRequest($request),
         );
 
         return redirect()->route('users.index');

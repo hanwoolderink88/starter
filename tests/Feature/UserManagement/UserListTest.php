@@ -1,6 +1,5 @@
 <?php
 
-use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Enums\UserStatus;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -27,7 +26,7 @@ test('index can filter users by role', function () {
     createRegularUser();
 
     $this->actingAs($admin)
-        ->get(route('users.index', ['role' => Role::SuperAdmin->value]))
+        ->get(route('users.index', ['role' => administratorRole()->id]))
         ->assertInertia(fn (Assert $page) => $page
             ->has('users.data', 1)
             ->where('users.data.0.id', $admin->id));

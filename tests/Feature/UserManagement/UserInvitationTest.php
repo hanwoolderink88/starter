@@ -1,44 +1,14 @@
 <?php
 
-use App\Features\UserManagement\Enums\Permission;
-use App\Features\UserManagement\Enums\Role;
 use App\Features\UserManagement\Notifications\InvitationNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
-use Spatie\Permission\Models\Permission as PermissionModel;
-use Spatie\Permission\Models\Role as RoleModel;
 
 beforeEach(function () {
-    foreach (Permission::cases() as $permission) {
-        PermissionModel::findOrCreate($permission->value, 'web');
-    }
-
-    $superAdminRole = RoleModel::findOrCreate(Role::SuperAdmin->value, 'web');
-    $superAdminRole->givePermissionTo(PermissionModel::all());
-    RoleModel::findOrCreate(Role::User->value, 'web');
+    seedUserRolesAndPermissions();
 });
-
-if (! function_exists('createAdmin')) {
-    function createAdmin(): User
-    {
-        $admin = User::factory()->create();
-        $admin->assignRole(Role::SuperAdmin);
-
-        return $admin;
-    }
-}
-
-if (! function_exists('createRegularUser')) {
-    function createRegularUser(): User
-    {
-        $user = User::factory()->create();
-        $user->assignRole(Role::User);
-
-        return $user;
-    }
-}
 
 test('admin creates user and invitation is sent', function () {
     Notification::fake();
@@ -48,7 +18,6 @@ test('admin creates user and invitation is sent', function () {
     $this->post(route('users.store'), [
         'name' => 'Invited User',
         'email' => 'invited@example.com',
-        'role' => Role::User->value,
     ])->assertRedirect(route('users.index'));
 
     $user = User::where('email', 'invited@example.com')->first();
