@@ -6,8 +6,11 @@ namespace App\Features\Auth\Actions;
 
 use App\Features\Auth\Concerns\PasswordValidationRules;
 use App\Features\Auth\Concerns\ProfileValidationRules;
-use App\Features\UserManagement\Enums\Role;
+use App\Infrastructure\Activity\Data\ChangeContext;
+use App\Infrastructure\Activity\Enums\ActivityEvent;
+use App\Infrastructure\Activity\Services\ActivityRecorder;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -21,6 +24,11 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
+
+    public function __construct(
+        private readonly ActivityRecorder $activityRecorder,
+        private readonly Request $request,
+    ) {}
 
     /**
      * Validate and create a newly registered user.
@@ -40,7 +48,12 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $input['password'],
         ]);
 
-        $user->assignRole(Role::User);
+        $this->activityRecorder->record(
+            ChangeContext::fromRequest($this->request, actor: $user),
+            ActivityEvent::Created,
+            $user,
+            ActivityRecorder::diff([], ['name' => $user->name, 'email' => $user->email]),
+        );
 
         return $user;
     }

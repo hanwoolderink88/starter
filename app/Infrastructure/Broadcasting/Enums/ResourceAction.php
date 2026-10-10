@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Broadcasting\Enums;
+namespace App\Infrastructure\Broadcasting\Enums;
 
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 

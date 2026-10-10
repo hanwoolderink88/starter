@@ -23,7 +23,7 @@ export default function Pagination({ meta }: { meta: PaginatorMeta }) {
             <p className="text-sm text-muted-foreground">
                 {t('common.pagination.showing', {
                     from: meta.from ?? 0,
-                    to: meta.to ?? 0,
+                    until: meta.to ?? 0,
                     total: meta.total,
                 })}
             </p>

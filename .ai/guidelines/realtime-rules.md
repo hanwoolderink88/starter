@@ -24,7 +24,7 @@ Actor saves ──HTTP──▶ Action ──persist (Service)──▶ broadcas
 
 ## Shared Broadcasting Infrastructure
 
-Real-time scaffolding is true infrastructure, not feature business logic, and lives in `app/Broadcasting/`:
+Real-time scaffolding is true infrastructure, not feature business logic, and lives in `app/Infrastructure/Broadcasting/`:
 
 - `ResourceAction` enum — `Created`, `Updated`, `Deleted` (TitleCase keys).
 - `ResourceChangedData` — the single, generic `#[TypeScript]` signal payload reused by every feature.
@@ -32,7 +32,7 @@ Real-time scaffolding is true infrastructure, not feature business logic, and li
 The payload is deliberately thin: enough to phrase a toast, decide what to reload, and suppress the originating surface's own echo. It MUST NOT carry record fields (no email, role, timestamps, etc.).
 
 ```php
-// app/Broadcasting/Data/ResourceChangedData.php
+// app/Infrastructure/Broadcasting/Data/ResourceChangedData.php
 #[TypeScript]
 class ResourceChangedData extends Data
 {
@@ -40,12 +40,16 @@ class ResourceChangedData extends Data
         public ResourceAction $action,
         public int $id,          // affected record id
         public string $label,    // human label for the toast, e.g. the user's name
-        public int $actorId,     // who did it — used for the toast label
+        public ?int $actorId,    // who did it; null when the application itself did
         public string $actorName,
+        public ActivitySource $source, // web, mcp or system
         public ?string $origin = null, // the initiating surface's client id — used to suppress its own echo; null for non-web surfaces (e.g. MCP)
+        public ?string $impersonatorName = null, // the real user while the actor is impersonated
     ) {}
 }
 ```
+
+Build it with `ResourceChangedData::fromContext($context, $action, $id, $label)` from the Action's `ChangeContext`, so the signal and the activity log name the same actor (see the Activity Log rules). The frontend turns actor, source and impersonator into one label (`lib/actor-label.ts`), which `useRealtimeResource` passes to `describe` and `onChange` as their second argument.
 
 ## Events
 
@@ -83,25 +87,20 @@ class UserChanged implements ShouldBroadcastNow
 
 ## Dispatching
 
-Broadcasting is a **side effect**, so it belongs in the **Action**, never the Service (Services persist only — see the backend rules). Dispatch after the Service has persisted, and pass the acting user — and the originating surface's `$origin` — in as parameters rather than reading global state.
+Broadcasting is a **side effect**, so it belongs in the **Action**, never the Service (Services persist only — see the backend rules). Dispatch after the Service has persisted, with the `ChangeContext` the caller passed in rather than reading global state.
 
 Dispatch with `Event::dispatch` (`{Model}Changed::dispatch(...)`), not the `broadcast()` helper: the dispatcher auto-broadcasts events implementing `ShouldBroadcast*` (so the behaviour is identical), and unlike `broadcast()` it can be asserted with `Event::fake()` in tests.
 
-The `$origin` is threaded straight through from the caller: web controllers pass `$request->header('X-Client-Id')`; non-web surfaces (MCP tools, console commands, jobs) pass nothing, leaving it `null` so every browser is notified.
+The origin travels inside the context: `ChangeContext::fromRequest()` reads the `X-Client-Id` header; the MCP and system contexts leave it `null` so every browser is notified.
 
 ```php
-public function handle(UserData $data, User $actor, ?string $origin = null): User
+public function handle(UserData $data, ChangeContext $context): User
 {
     $user = $this->userService->store($data);
 
-    UserChanged::dispatch(new ResourceChangedData(
-        action: ResourceAction::Created,
-        id: $user->id,
-        label: $user->name,
-        actorId: $actor->id,
-        actorName: $actor->name,
-        origin: $origin,
-    ));
+    $this->activityRecorder->record($context, ActivityEvent::Created, $user, ActivityRecorder::diff([], [...]));
+
+    UserChanged::dispatch(ResourceChangedData::fromContext($context, ResourceAction::Created, $user->id, $user->name));
 
     return $user;
 }
@@ -140,6 +139,15 @@ The strategy is a property of the consuming view, not the event:
 
 For a same-record conflict (someone saved the record you are editing), make it prominent (`toast.warning` or an inline banner) because reloading discards the user's edits.
 
+## Stale Versions (Optimistic Locking)
+
+Live updates never overwrite what someone is typing (`mode: 'ask'` on forms), and a save never silently overwrites someone else's save. Every record that more than one person can edit has an integer `version` column (default 1) and uses `App\Infrastructure\Activity\Concerns\HasVersion`. `updated_at` is not a lock: two saves within the same second leave it unchanged.
+
+- The record's Data class exposes `version`; the edit form posts it and the update request validates `'version' => ['required', 'integer', 'min:1']`.
+- The Service saves with `$model->updateAtVersion($expectedVersion, [...])`: one `UPDATE … WHERE version = ?` that raises the version, or `StaleVersionException` when no row was hit. A change that is not checked against a version (a user's own profile) calls `bumpVersion()`, so an older form opened elsewhere is refused.
+- `StaleVersionException` **is** a `ValidationException` on `version`: the web gets `errors.version`, an MCP tool the same text. Its message names who saved and when (from the activity log) and the current version. Add `{table}.conflict.changed_by` and `{table}.conflict.changed` to `lang/{en,nl}/{table}.php`.
+- The form shows `components/conflict-banner.tsx` at `errors.version` (copy my changes, load the latest version). A refused save comes back with the *current* record in the props, so a form that syncs its fields from the record must skip that sync while the page has errors; the banner's reload sets the fields explicitly.
+
 ## Suppress the Originating Surface's Own Echo
 
 The surface that made the change already saw the result of its own request and must not get a toast or reload. Suppress on the **origin**, not the user: each web SPA tab generates a stable client id (`lib/client-id.ts`) that an `http.onRequest` interceptor in `app.tsx` attaches as the `X-Client-Id` header on every request. Controllers echo it into `ResourceChangedData::$origin`, and the hook drops the event only when `payload.origin === clientId`.
@@ -163,7 +171,7 @@ useRealtimeResource({
 
 Origin self-suppression is handled inside the hook via the shared client id — pages pass nothing for it.
 
-The payload type is the generated `App.Broadcasting.Data.ResourceChangedData` — never hand-write it.
+The payload type is the generated `App.Infrastructure.Broadcasting.Data.ResourceChangedData` — never hand-write it.
 
 ## Presence (Optional)
 

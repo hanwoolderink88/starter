@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Features\Settings\Controllers;
 
+use App\Features\Settings\Actions\UpdatePasswordAction;
 use App\Features\Settings\Data\PasswordPageData;
 use App\Features\Settings\Requests\PasswordUpdateRequest;
-use App\Features\Settings\Services\PasswordService;
 use App\Http\Controllers\Controller;
+use App\Infrastructure\Activity\Data\ChangeContext;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
@@ -17,7 +18,7 @@ use Inertia\Response;
 class PasswordController extends Controller
 {
     public function __construct(
-        private readonly PasswordService $passwordService,
+        private readonly UpdatePasswordAction $updatePasswordAction,
     ) {}
 
     /**
@@ -40,9 +41,9 @@ class PasswordController extends Controller
         $user = $request->user();
         assert($user instanceof User);
 
-        $this->passwordService->update($user, $request->validated('password'));
+        $this->updatePasswordAction->handle($user, $request->validated('password'), ChangeContext::fromRequest($request));
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Password updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('settings.flash.password_updated')]);
 
         return back();
     }

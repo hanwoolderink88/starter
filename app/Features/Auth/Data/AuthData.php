@@ -10,5 +10,12 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class AuthData extends Data
 {
-    public function __construct(public ?UserData $user) {}
+    public function __construct(
+        public ?UserData $user,
+        /**
+         * The real user behind this session while it impersonates `user`,
+         * otherwise null.
+         */
+        public ?string $impersonatorName = null,
+    ) {}
 }

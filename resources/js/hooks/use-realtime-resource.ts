@@ -1,8 +1,10 @@
 import { router } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
+import { useLaravelReactI18n } from 'laravel-react-i18n';
 import { toast } from 'sonner';
+import { actorLabel } from '@/lib/actor-label';
 import { getClientId } from '@/lib/client-id';
-import { ResourceAction, type ResourceChangedData } from '@/types/generated';
+import type { ResourceChangedData } from '@/types/generated';
 
 interface RealtimeResourceOptions {
     /** Echo channel name without the `private-` prefix (e.g. `users`, `user.42`). */
@@ -13,8 +15,11 @@ interface RealtimeResourceOptions {
     only?: string[];
     /** `auto` reloads immediately; `ask` shows a toast with a Reload action. */
     mode?: 'auto' | 'ask';
-    /** Toast message for the default (non-handled) path. */
-    describe?: (event: ResourceChangedData) => string;
+    /**
+     * Toast message for the default (non-handled) path. `actor` is the
+     * ready-made label for whoever made the change, impersonation included.
+     */
+    describe?: (event: ResourceChangedData, actor: string) => string;
     /**
      * Prefetch cache tags to flush when a change arrives — keeps prefetched
      * detail/edit pages from serving stale data after a concurrent change.
@@ -25,14 +30,8 @@ interface RealtimeResourceOptions {
      * mark the event fully handled and skip the default toast + reload (used for
      * cases like redirecting away when the record you are viewing is deleted).
      */
-    onChange?: (event: ResourceChangedData) => boolean | void;
+    onChange?: (event: ResourceChangedData, actor: string) => boolean | void;
 }
-
-const ACTION_VERB: Record<ResourceAction, string> = {
-    [ResourceAction.Created]: 'created',
-    [ResourceAction.Updated]: 'updated',
-    [ResourceAction.Deleted]: 'deleted',
-};
 
 /**
  * Subscribe a page to a resource's co-working broadcasts: suppress the
@@ -48,6 +47,7 @@ export function useRealtimeResource({
     invalidateTags,
     onChange,
 }: RealtimeResourceOptions): void {
+    const { t } = useLaravelReactI18n();
     const clientId = getClientId();
 
     useEcho<ResourceChangedData>(
@@ -66,18 +66,30 @@ export function useRealtimeResource({
                 router.flushByCacheTags(tags);
             }
 
-            if (onChange?.(payload) === true) {
+            const actor = actorLabel(t, {
+                name: payload.actorName,
+                impersonatorName: payload.impersonatorName,
+                source: payload.source,
+            });
+
+            if (onChange?.(payload, actor) === true) {
                 return;
             }
 
             const message =
-                describe?.(payload) ??
-                `${payload.actorName} ${ACTION_VERB[payload.action]} ${payload.label}`;
+                describe?.(payload, actor) ??
+                t(`common.realtime.${payload.action}`, {
+                    actor,
+                    label: payload.label,
+                });
             const reload = () => router.reload(only ? { only } : {});
 
             if (mode === 'ask') {
                 toast.warning(message, {
-                    action: { label: 'Reload', onClick: reload },
+                    action: {
+                        label: t('common.realtime.reload'),
+                        onClick: reload,
+                    },
                 });
 
                 return;

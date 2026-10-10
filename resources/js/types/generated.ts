@@ -1,5 +1,83 @@
+export type ActivityCauserData = {
+    id: number;
+    name: string;
+};
+export type ActivityData = {
+    id: number;
+    event: ActivityEvent;
+    subjectType: string | null;
+    subjectId: number | null;
+    causerId: number | null;
+    causerName: string;
+    impersonatorName: string | null;
+    source: ActivitySource;
+    changes: Record<string, unknown>;
+    snapshot: Record<string, unknown> | null;
+    ipAddress: string | null;
+    userAgent: string | null;
+    createdAt: string;
+    createdAtDisplay: string;
+};
+export enum ActivityEvent {
+    Created = 'created',
+    Updated = 'updated',
+    Deleted = 'deleted',
+    Restored = 'restored',
+    Anonymized = 'anonymized',
+    StatusChanged = 'status_changed',
+    RolesChanged = 'roles_changed',
+    InvitationResent = 'invitation_resent',
+    InvitationAccepted = 'invitation_accepted',
+    ImpersonationStarted = 'impersonation_started',
+    ImpersonationStopped = 'impersonation_stopped',
+    LoggedIn = 'logged_in',
+    LoggedOut = 'logged_out',
+    LoginFailed = 'login_failed',
+    LockedOut = 'locked_out',
+    PasswordReset = 'password_reset',
+    PasswordChanged = 'password_changed',
+    OtherSessionsLoggedOut = 'other_sessions_logged_out',
+    TwoFactorEnabled = 'two_factor_enabled',
+    TwoFactorConfirmed = 'two_factor_confirmed',
+    TwoFactorDisabled = 'two_factor_disabled',
+    TwoFactorFailed = 'two_factor_failed',
+    RecoveryCodesGenerated = 'recovery_codes_generated',
+    RecoveryCodeUsed = 'recovery_code_used',
+}
+export type ActivityFiltersData = {
+    event: ActivityEvent | null;
+    source: ActivitySource | null;
+    causerId: number | null;
+    subjectType: string | null;
+    subjectId: number | null;
+    from: string | null;
+    to: string | null;
+};
+export type ActivityLogEntryData = {
+    activity: ActivityData;
+    subjectName: string | null;
+    subjectExists: boolean;
+};
+export type ActivityPageData = {
+    entries: PaginatedDataCollection<number, ActivityLogEntryData>;
+    filters: ActivityFiltersData;
+    causerOptions: ActivityCauserData[];
+    subjectTypeOptions: string[];
+};
+export enum ActivitySource {
+    Web = 'web',
+    Mcp = 'mcp',
+    System = 'system',
+}
+export type AssignableRoleData = {
+    id: number;
+    name: string;
+    isActive: boolean;
+    isProtected: boolean;
+};
 export type AuthData = {
     user: UserData | null;
+    impersonatorName: string | null;
 };
 export type CursorPaginatedDataCollection<TKey, TValue> = CursorPaginator<
     TKey,
@@ -71,7 +149,18 @@ export enum Permission {
     UpdateUsers = 'update users',
     DeleteUsers = 'delete users',
     ImpersonateUsers = 'impersonate users',
+    ManageRoles = 'manage roles',
+    ViewActivity = 'view activity',
 }
+export enum PermissionGroup {
+    Users = 'users',
+    Roles = 'roles',
+    Activity = 'activity',
+}
+export type PermissionGroupData = {
+    group: PermissionGroup;
+    permissions: Permission[];
+};
 export type ProfilePageData = {
     mustVerifyEmail: boolean;
     status: string | null;
@@ -93,23 +182,64 @@ export type ResourceChangedData = {
     action: ResourceAction;
     id: number;
     label: string;
-    actorId: number;
+    actorId: number | null;
     actorName: string;
+    source: ActivitySource;
     origin: string | null;
+    impersonatorName: string | null;
 };
-export enum Role {
-    User = 'user',
-    SuperAdmin = 'super-admin',
-}
+export type RoleData = {
+    id: number;
+    name: string;
+    description: string | null;
+    isActive: boolean;
+    isProtected: boolean;
+    permissionCount: number;
+    userCount: number;
+    version: number;
+};
+export type RoleFormPageData = {
+    role: RoleData | null;
+    permissionGroups: PermissionGroupData[];
+    rolePermissions: Permission[];
+    activity: ActivityData[] | null;
+    holders: RoleHolderData[];
+};
+export type RoleHolderData = {
+    id: number;
+    name: string;
+};
+export type RolesPageData = {
+    roles: RoleData[];
+    permissionTotal: number;
+    inactiveCount: number;
+};
+export type SessionData = {
+    ipAddress: string | null;
+    browser: string | null;
+    platform: string | null;
+    isDesktop: boolean;
+    isCurrentDevice: boolean;
+    lastActiveAt: string;
+    lastActiveDisplay: string;
+};
+export type SessionsPageData = {
+    sessions: SessionData[];
+    available: boolean;
+};
 export type SharedData = {
     name: string;
     auth: AuthData;
     permissions: Permission[];
     sidebarOpen: boolean;
+    locale: string;
+    supportedLocales: string[];
 };
 export type ShowUserPageData = {
     user: UserManagementData;
     canUpdate: boolean;
+    canImpersonate: boolean;
+    activity: ActivityData[] | null;
 };
 export enum SortDirection {
     Asc = 'asc',
@@ -138,12 +268,15 @@ export type UserData = {
 };
 export type UserFiltersData = {
     search: string | null;
-    role: Role | null;
+    roleId: number | null;
     status: UserStatus | null;
 };
 export type UserFormPageData = {
     user: UserManagementData | null;
-    roles: Record<string, string>;
+    roles: AssignableRoleData[];
+    roleIds: number[];
+    canAssignRoles: boolean;
+    isLastAdministrator: boolean;
 };
 export type UserManagementData = {
     id: number;
@@ -152,8 +285,10 @@ export type UserManagementData = {
     email_verified_at: string | null;
     created_at: string;
     created_at_display: string;
-    role: string;
+    roles: string[];
     has_password: boolean;
+    version: number;
+    anonymizes_on_display: string | null;
 };
 export enum UserSortColumn {
     Name = 'name',
@@ -167,15 +302,17 @@ export type UserSortData = {
 export enum UserStatus {
     Active = 'active',
     Invited = 'invited',
+    Deleted = 'deleted',
 }
 export type UsersPageData = {
     users: PaginatedDataCollection<number, UserManagementData>;
     filters: UserFiltersData;
     sort: UserSortData;
-    roleOptions: Record<string, string>;
+    roleOptions: AssignableRoleData[];
     statusOptions: Record<string, string>;
     canCreate: boolean;
-    canImpersonate: boolean;
+    impersonatableIds: number[];
+    restoreDays: number;
 };
 export type VerifyEmailPageData = {
     status: string | null;

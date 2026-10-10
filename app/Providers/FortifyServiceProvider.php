@@ -13,7 +13,9 @@ use App\Features\Auth\Data\ResetPasswordPageData;
 use App\Features\Auth\Data\VerifyEmailPageData;
 use App\Features\Auth\Responses\LoginResponse;
 use App\Features\Auth\Responses\TwoFactorLoginResponse;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -111,7 +113,13 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
-            return Limit::perMinute(5)->by($throttleKey);
+            // A named limiter bypasses Fortify's own Lockout event, so it is
+            // fired here for the activity log; the response stays the default.
+            return Limit::perMinute(5)->by($throttleKey)->response(function (Request $request, array $headers): never {
+                event(new Lockout($request));
+
+                throw new ThrottleRequestsException('Too Many Attempts.', null, $headers);
+            });
         });
     }
 }

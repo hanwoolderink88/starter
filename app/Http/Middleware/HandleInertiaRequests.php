@@ -7,7 +7,8 @@ namespace App\Http\Middleware;
 use App\Data\SharedData;
 use App\Features\Auth\Data\AuthData;
 use App\Features\Auth\Data\UserData;
-use App\Features\UserManagement\Enums\Permission;
+use App\Features\Roles\Enums\Permission;
+use App\Infrastructure\Activity\Data\ChangeContext;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -54,6 +55,7 @@ class HandleInertiaRequests extends Middleware
                 name: config('app.name'),
                 auth: new AuthData(
                     user: $user instanceof User ? UserData::from($user) : null,
+                    impersonatorName: ChangeContext::impersonatorFor($request)?->name,
                 ),
                 permissions: $user instanceof User
                     ? array_values(array_filter(
@@ -62,6 +64,8 @@ class HandleInertiaRequests extends Middleware
                     ))
                     : [],
                 sidebarOpen: ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+                locale: app()->getLocale(),
+                supportedLocales: config('app.supported_locales'),
             )->toArray(),
         ];
     }

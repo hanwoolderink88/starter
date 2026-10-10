@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Features\UserManagement\Events;
 
-use App\Broadcasting\Data\ResourceChangedData;
+use App\Infrastructure\Broadcasting\Data\ResourceChangedData;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;

@@ -49,6 +49,7 @@ Actions are domain-level classes that orchestrate complex workflows by combining
 - `handle()` may return a value and may have side effects.
 - No cross-feature mutation without going through an Action.
 - Broadcasting domain events for co-working updates is an Action side effect — dispatch them here, never from a Service. See the Real-Time & Co-Working rules.
+- Every mutating Action receives a `ChangeContext` (who, through which surface, impersonated by whom) and records what it changed with the `ActivityRecorder`. See the Activity Log rules.
 
 ```php
 class CreateUserAction
@@ -56,15 +57,16 @@ class CreateUserAction
     public function __construct(
         private UserService $userService,
         private NotificationService $notificationService,
+        private ActivityRecorder $activityRecorder,
     ) {}
 
-    public function handle(UserData $data): User
+    public function handle(UserData $data, ChangeContext $context): User
     {
         $user = $this->userService->store($data);
 
         $this->notificationService->sendWelcome($user);
 
-        Log::info('User created', ['user_id' => $user->id]);
+        $this->activityRecorder->record($context, ActivityEvent::Created, $user);
 
         return $user;
     }
@@ -184,6 +186,14 @@ public function update(UpdateUserRequest $request, User $user): RedirectResponse
 }
 ```
 
+## Security Headers & Sessions
+
+- `App\Http\Middleware\SecurityHeaders` sends a Content Security Policy with a per-request nonce, plus X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy and (over HTTPS) HSTS, configured in `config/security.php`.
+- An inline `<script>` in a Blade view needs `nonce="{{ Vite::cspNonce() }}"`, or the browser refuses it. Never add `'unsafe-inline'` or `'unsafe-eval'` to `script-src`.
+- A new external origin (a CDN, an error tracker, an API the browser calls) goes into `config/security.php` (`CSP_CONNECT_SRC` for `connect-src`), not into the middleware. Try a stricter policy with `CSP_REPORT_ONLY=true` first.
+- `AuthenticateSession` is in the web group: changing the password, or "log out other browser sessions" (`settings/sessions`), ends every other session and "remember me" cookie of that user.
+- Never send a session id to the browser.
+
 ## Feature Boundaries
 
 - Features may not directly depend on other feature internals.
@@ -224,7 +234,7 @@ The following global directories are forbidden:
 - `app/Utils/`
 - Shared business logic outside a feature
 
-If something feels "shared", it likely belongs to a feature, to Integrations, or is true infrastructure.
+If something feels "shared", it likely belongs to a feature, to Integrations, or is true infrastructure. True infrastructure that every feature uses — the activity log and the broadcasting signal — lives in `app/Infrastructure/`; it holds no business logic and never depends on a feature.
 
 ## Naming Rules
 

@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Features\Auth\Actions;
 
 use App\Features\Auth\Concerns\PasswordValidationRules;
+use App\Infrastructure\Activity\Data\ChangeContext;
+use App\Infrastructure\Activity\Enums\ActivityEvent;
+use App\Infrastructure\Activity\Services\ActivityRecorder;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
@@ -19,6 +23,11 @@ use Laravel\Fortify\Contracts\ResetsUserPasswords;
 class ResetUserPassword implements ResetsUserPasswords
 {
     use PasswordValidationRules;
+
+    public function __construct(
+        private readonly ActivityRecorder $activityRecorder,
+        private readonly Request $request,
+    ) {}
 
     /**
      * Validate and reset the user's forgotten password.
@@ -34,5 +43,11 @@ class ResetUserPassword implements ResetsUserPasswords
         $user->forceFill([
             'password' => $input['password'],
         ])->save();
+
+        $this->activityRecorder->record(
+            ChangeContext::fromRequest($this->request, actor: $user),
+            ActivityEvent::PasswordReset,
+            $user,
+        );
     }
 }
