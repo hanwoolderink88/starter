@@ -1,13 +1,10 @@
 import { createInertiaApp, http } from '@inertiajs/react';
 import { configureEcho } from '@laravel/echo-react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { LaravelReactI18nProvider } from 'laravel-react-i18n';
 import '../css/app.css';
 import { Toaster } from './components/ui/sonner';
 import { initializeTheme } from './hooks/use-appearance';
 import { getClientId } from './lib/client-id';
-import { makeQueryClient } from './lib/query-client';
 
 configureEcho({
     broadcaster: 'reverb',
@@ -25,8 +22,6 @@ if (!import.meta.env.SSR) {
 }
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-
-let queryClient: ReturnType<typeof makeQueryClient> | undefined;
 
 function getTransitionType(
     currentPath: string,
@@ -54,23 +49,14 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     strictMode: true,
     withApp(app) {
-        // On the SSR server every request gets a fresh QueryClient; in the
-        // browser a single client is reused across Inertia navigations.
-        const client = import.meta.env.SSR
-            ? makeQueryClient()
-            : (queryClient ??= makeQueryClient());
-
         return (
             <LaravelReactI18nProvider
                 locale="en"
                 fallbackLocale="en"
                 files={import.meta.glob('/lang/*.json', { eager: true })}
             >
-                <QueryClientProvider client={client}>
-                    {app}
-                    <Toaster />
-                    <ReactQueryDevtools initialIsOpen={false} />
-                </QueryClientProvider>
+                {app}
+                <Toaster />
             </LaravelReactI18nProvider>
         );
     },

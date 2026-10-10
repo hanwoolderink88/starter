@@ -26,7 +26,6 @@ class PasswordController extends Controller
     public function edit(): Response
     {
         $password = Password::defaults();
-        assert($password instanceof Password);
 
         return Inertia::render('settings/password', new PasswordPageData(
             passwordRules: $password->toPasswordRulesString(),

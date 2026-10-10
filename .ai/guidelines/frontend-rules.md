@@ -6,11 +6,7 @@ Pages compose. Components render. Hooks contain logic. shadcn provides primitive
 
 ## Data Fetching Strategy
 
-**Inertia is the default.** All data loading and form submissions should use Inertia patterns first — page props via `Inertia::render()`, `useForm`, `<Form>`, and `router.visit()`. These cover the vast majority of use cases and keep the frontend tightly integrated with Laravel's server-side routing, validation, and session handling.
-
-**React Query is the exception.** Only reach for React Query (`useQuery`, `fetchClient`) when Inertia genuinely cannot serve the need — for example: background polling, client-side caching across navigations, or fetching data outside the Inertia page lifecycle where it measurably reduces complexity.
-
-**Using React Query over an Inertia pattern must always be asked explicitly.** Never silently swap an Inertia approach for a React Query one. If React Query seems like a better fit, explain why and get approval before proceeding.
+**Inertia is the only data layer.** All data loading and form submissions use Inertia patterns — page props via `Inertia::render()`, `useForm`, `<Form>`, `router.visit()` and `router.reload({ only })`. For the rare request that falls outside a page visit (e.g. a background poll or a standalone JSON call), use Inertia's built-in `useHttp` hook or `usePoll` instead of adding a separate data-fetching library. Do not add React Query, SWR, or similar libraries without explicit approval.
 
 **Live updates use Reverb signals + Inertia partial reloads.** For pages that show data others can change concurrently, subscribe via the real-time hook and refresh with `router.reload({ only })` — do not fetch the changed records over the socket. See the Real-Time & Co-Working rules.
 

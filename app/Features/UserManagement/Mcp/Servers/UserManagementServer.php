@@ -32,7 +32,7 @@ class UserManagementServer extends Server
     ];
 
     /**
-     * @var array<int, class-string<Tool>|Tool>
+     * @var array<int|string, Tool|class-string<Tool>|array<int, Tool|class-string<Tool>>>
      */
     #[Override]
     protected array $tools = self::TOOLS;

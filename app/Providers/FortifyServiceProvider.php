@@ -97,7 +97,6 @@ class FortifyServiceProvider extends ServiceProvider
     private function passwordRules(): string
     {
         $password = Password::defaults();
-        assert($password instanceof Password);
 
         return $password->toPasswordRulesString();
     }

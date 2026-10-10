@@ -35,7 +35,7 @@ class UserManagementData extends Data
             email_verified_at: $user->email_verified_at?->toISOString(),
             created_at: $user->created_at?->toISOString() ?? '',
             created_at_display: $user->created_at?->isoFormat('ll') ?? '',
-            role: $firstRole !== null ? $firstRole->name : Role::User->value,
+            role: $firstRole->name ?? Role::User->value,
             has_password: $user->password !== null,
         );
     }
